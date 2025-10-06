@@ -13,7 +13,7 @@ import {
   FaChartBar,
   FaRobot,
   FaArrowRight,
-  FaFlow,
+  FaProjectDiagram,
   FaMagic,
 } from "react-icons/fa";
 
@@ -184,7 +184,7 @@ const AutoReplyPage = () => {
             className="text-center mb-16"
           >
             <div className="w-24 h-24 bg-gradient-to-r from-blue-500 to-purple-500 rounded-3xl flex items-center justify-center mx-auto mb-8">
-              <FaFlow className="text-4xl text-white" />
+              <FaProjectDiagram className="text-4xl text-white" />
             </div>
             <h1 className="text-6xl lg:text-7xl font-black text-white mb-6">
               Auto Reply Flows
