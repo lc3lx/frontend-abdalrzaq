@@ -21,7 +21,7 @@ const AdminRoute = ({ children }) => {
 
       // Try to access admin dashboard stats to check if user is admin
       const response = await axios.get(
-        "http://localhost:5000/api/admin/dashboard/stats",
+        "https://www.sushiluha.com/api/admin/dashboard/stats",
         {
           headers: { Authorization: `Bearer ${token}` },
           withCredentials: true,

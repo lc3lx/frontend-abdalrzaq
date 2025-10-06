@@ -10,6 +10,8 @@ import AdminUsers from "./pages/AdminUsers";
 import AdminPayments from "./pages/AdminPayments";
 import AdminPackages from "./pages/AdminPackages";
 import PackagesPage from "./pages/PackagesPageNew";
+import TermsOfService from "./pages/TermsOfService";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 import AdminRoute from "./components/AdminRoute";
 
 export default function App() {
@@ -55,6 +57,8 @@ export default function App() {
             }
           />
           <Route path="/packages" element={<PackagesPage />} />
+          <Route path="/terms-of-service" element={<TermsOfService />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         </Routes>
       </Router>
     </ThemeProvider>

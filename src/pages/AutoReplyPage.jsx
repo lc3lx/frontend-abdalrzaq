@@ -1,20 +1,20 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { motion } from "framer-motion";
 import FlowDiagram from "../components/AutoReply/FlowDiagram";
 import FlowBuilder from "../components/AutoReply/FlowBuilder";
-import FlowExample from "../components/AutoReply/FlowExample";
 import SubscriptionCheck from "../components/SubscriptionCheck";
 import TelegramQuickConnect from "../components/Telegram/TelegramQuickConnect";
 import WhatsAppQuickConnect from "../components/WhatsApp/WhatsAppQuickConnect";
+import Navbar from "../components/Navbar";
 import {
-  FaPlus,
   FaPlay,
   FaPause,
-  FaEdit,
-  FaTrash,
-  FaCog,
   FaChartBar,
   FaRobot,
+  FaArrowRight,
+  FaFlow,
+  FaMagic,
 } from "react-icons/fa";
 
 const AutoReplyPage = () => {
@@ -22,6 +22,20 @@ const AutoReplyPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingFlow, setEditingFlow] = useState(null);
+  const [windowSize, setWindowSize] = useState({ width: 1920, height: 1080 });
+
+  useEffect(() => {
+    const updateSize = () => {
+      setWindowSize({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    };
+
+    updateSize();
+    window.addEventListener("resize", updateSize);
+    return () => window.removeEventListener("resize", updateSize);
+  }, []);
 
   useEffect(() => {
     fetchFlows();
@@ -110,153 +124,291 @@ const AutoReplyPage = () => {
   const inactiveFlows = flows.filter((flow) => !flow.isActive);
 
   return (
-    <section>
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-800">Auto Reply Flows</h2>
-          <p className="text-gray-600">
-            Create and manage automated response flows
-          </p>
-        </div>
-        <SubscriptionCheck serviceType="auto_reply">
-          <button
-            onClick={handleCreateFlow}
-            className="bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition-transform duration-300 transform hover:scale-105 flex items-center gap-2"
-          >
-            <FaPlus />
-            Create Flow
-          </button>
-        </SubscriptionCheck>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
+      <Navbar />
+
+      {/* Animated Background */}
+      <motion.div
+        className="absolute inset-0"
+        animate={{
+          background: [
+            "radial-gradient(600px circle at 20% 30%, #3b82f6 0%, transparent 50%)",
+            "radial-gradient(600px circle at 80% 70%, #8b5cf6 0%, transparent 50%)",
+            "radial-gradient(600px circle at 40% 80%, #ec4899 0%, transparent 50%)",
+            "radial-gradient(600px circle at 20% 30%, #3b82f6 0%, transparent 50%)",
+          ],
+        }}
+        transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+      />
+
+      {/* Floating Particles */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {[...Array(20)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute w-2 h-2 bg-blue-400/20 rounded-full"
+            animate={{
+              x: [
+                Math.random() * windowSize.width,
+                Math.random() * windowSize.width,
+              ],
+              y: [
+                Math.random() * windowSize.height,
+                Math.random() * windowSize.height,
+              ],
+              opacity: [0, 1, 0],
+            }}
+            transition={{
+              duration: Math.random() * 20 + 10,
+              repeat: Infinity,
+              delay: Math.random() * 5,
+              ease: "linear",
+            }}
+          />
+        ))}
       </div>
 
-      {/* Flow Example */}
-      <FlowExample />
-
-      {/* Telegram Quick Connect */}
-      <TelegramQuickConnect onTelegramConnected={fetchFlows} />
-
-      {/* WhatsApp Quick Connect */}
-      <WhatsAppQuickConnect onWhatsAppConnected={fetchFlows} />
-
-      {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white p-4 rounded-lg shadow-md border-t-4 border-blue-500">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600">Total Flows</p>
-              <p className="text-2xl font-bold text-gray-800">{flows.length}</p>
-            </div>
-            <FaRobot className="text-blue-500 text-2xl" />
-          </div>
-        </div>
-
-        <div className="bg-white p-4 rounded-lg shadow-md border-t-4 border-green-500">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600">Active Flows</p>
-              <p className="text-2xl font-bold text-gray-800">
-                {activeFlows.length}
-              </p>
-            </div>
-            <FaPlay className="text-green-500 text-2xl" />
-          </div>
-        </div>
-
-        <div className="bg-white p-4 rounded-lg shadow-md border-t-4 border-yellow-500">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600">Inactive Flows</p>
-              <p className="text-2xl font-bold text-gray-800">
-                {inactiveFlows.length}
-              </p>
-            </div>
-            <FaPause className="text-yellow-500 text-2xl" />
-          </div>
-        </div>
-
-        <div className="bg-white p-4 rounded-lg shadow-md border-t-4 border-purple-500">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600">Total Replies</p>
-              <p className="text-2xl font-bold text-gray-800">
-                {flows.reduce(
-                  (sum, flow) => sum + (flow.statistics?.totalReplies || 0),
-                  0
-                )}
-              </p>
-            </div>
-            <FaChartBar className="text-purple-500 text-2xl" />
-          </div>
-        </div>
-      </div>
-
-      {/* Active Flows */}
-      {activeFlows.length > 0 && (
-        <div className="mb-8">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-            <FaPlay className="text-green-500" />
-            Active Flows ({activeFlows.length})
-          </h3>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {activeFlows.map((flow) => (
-              <FlowDiagram
-                key={flow._id}
-                flow={flow}
-                onEdit={handleEditFlow}
-                onDelete={handleDeleteFlow}
-                onToggle={handleToggleFlow}
-              />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Inactive Flows */}
-      {inactiveFlows.length > 0 && (
-        <div className="mb-8">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-            <FaPause className="text-yellow-500" />
-            Inactive Flows ({inactiveFlows.length})
-          </h3>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {inactiveFlows.map((flow) => (
-              <FlowDiagram
-                key={flow._id}
-                flow={flow}
-                onEdit={handleEditFlow}
-                onDelete={handleDeleteFlow}
-                onToggle={handleToggleFlow}
-              />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Empty State */}
-      {flows.length === 0 && !isLoading && (
-        <div className="bg-white p-8 rounded-lg shadow-md text-center">
-          <FaRobot className="text-gray-400 text-6xl mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-gray-800 mb-2">
-            No Auto Reply Flows
-          </h3>
-          <p className="text-gray-600 mb-4">
-            Create your first auto reply flow to start automating responses
-          </p>
-          <button
-            onClick={handleCreateFlow}
-            className="bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 transition-colors"
+      {/* Main Content */}
+      <div className="relative z-10 pt-20 px-6 py-20">
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, delay: 0.2 }}
+          className="max-w-7xl mx-auto"
+        >
+          {/* Header */}
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="text-center mb-16"
           >
-            Create Your First Flow
-          </button>
-        </div>
-      )}
+            <div className="w-24 h-24 bg-gradient-to-r from-blue-500 to-purple-500 rounded-3xl flex items-center justify-center mx-auto mb-8">
+              <FaFlow className="text-4xl text-white" />
+            </div>
+            <h1 className="text-6xl lg:text-7xl font-black text-white mb-6">
+              Auto Reply Flows
+            </h1>
+            <p className="text-xl text-white/80 max-w-3xl mx-auto mb-8">
+              Create intelligent automated response flows that engage your
+              customers automatically
+            </p>
 
-      {/* Loading State */}
-      {isLoading && (
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-        </div>
-      )}
+            {/* Create Flow Button */}
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="inline-block"
+            >
+              <SubscriptionCheck serviceType="auto_reply">
+                <button
+                  onClick={handleCreateFlow}
+                  className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-4 rounded-2xl font-bold text-lg shadow-2xl hover:from-purple-700 hover:to-pink-700 transition-all duration-300 flex items-center gap-3"
+                >
+                  <FaMagic />
+                  Create New Flow
+                  <FaArrowRight />
+                </button>
+              </SubscriptionCheck>
+            </motion.div>
+          </motion.div>
+
+          {/* Quick Connections */}
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+            className="grid md:grid-cols-2 gap-8 mb-16"
+          >
+            <div className="bg-white/10 backdrop-blur-xl rounded-3xl border border-white/20 shadow-2xl p-8">
+              <TelegramQuickConnect onTelegramConnected={fetchFlows} />
+            </div>
+            <div className="bg-white/10 backdrop-blur-xl rounded-3xl border border-white/20 shadow-2xl p-8">
+              <WhatsAppQuickConnect onWhatsAppConnected={fetchFlows} />
+            </div>
+          </motion.div>
+
+          {/* Statistics Cards */}
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8 }}
+            className="mb-16"
+          >
+            <h2 className="text-3xl font-bold text-white mb-8 text-center">
+              Your Flow Statistics
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+              <motion.div
+                whileHover={{ scale: 1.05, y: -5 }}
+                className="bg-gradient-to-br from-blue-500 to-blue-600 p-8 rounded-3xl text-center shadow-2xl"
+              >
+                <FaRobot className="text-4xl text-white mx-auto mb-4" />
+                <div className="text-3xl font-black text-white mb-2">
+                  {flows.length}
+                </div>
+                <div className="text-white/90 font-medium">Total Flows</div>
+              </motion.div>
+
+              <motion.div
+                whileHover={{ scale: 1.05, y: -5 }}
+                className="bg-gradient-to-br from-green-500 to-green-600 p-8 rounded-3xl text-center shadow-2xl"
+              >
+                <FaPlay className="text-4xl text-white mx-auto mb-4" />
+                <div className="text-3xl font-black text-white mb-2">
+                  {activeFlows.length}
+                </div>
+                <div className="text-white/90 font-medium">Active Flows</div>
+              </motion.div>
+
+              <motion.div
+                whileHover={{ scale: 1.05, y: -5 }}
+                className="bg-gradient-to-br from-yellow-500 to-orange-500 p-8 rounded-3xl text-center shadow-2xl"
+              >
+                <FaPause className="text-4xl text-white mx-auto mb-4" />
+                <div className="text-3xl font-black text-white mb-2">
+                  {inactiveFlows.length}
+                </div>
+                <div className="text-white/90 font-medium">Inactive Flows</div>
+              </motion.div>
+
+              <motion.div
+                whileHover={{ scale: 1.05, y: -5 }}
+                className="bg-gradient-to-br from-purple-500 to-purple-600 p-8 rounded-3xl text-center shadow-2xl"
+              >
+                <FaChartBar className="text-4xl text-white mx-auto mb-4" />
+                <div className="text-3xl font-black text-white mb-2">
+                  {flows.reduce(
+                    (sum, flow) => sum + (flow.statistics?.totalReplies || 0),
+                    0
+                  )}
+                </div>
+                <div className="text-white/90 font-medium">Total Replies</div>
+              </motion.div>
+            </div>
+          </motion.div>
+
+          {/* Active Flows */}
+          {activeFlows.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1 }}
+              className="mb-16"
+            >
+              <div className="flex items-center justify-center gap-4 mb-8">
+                <FaPlay className="text-green-400 text-2xl" />
+                <h3 className="text-3xl font-bold text-white">
+                  Active Flows ({activeFlows.length})
+                </h3>
+                <FaPlay className="text-green-400 text-2xl" />
+              </div>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {activeFlows.map((flow, index) => (
+                  <motion.div
+                    key={flow._id}
+                    initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                  >
+                    <FlowDiagram
+                      flow={flow}
+                      onEdit={handleEditFlow}
+                      onDelete={handleDeleteFlow}
+                      onToggle={handleToggleFlow}
+                    />
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+
+          {/* Inactive Flows */}
+          {inactiveFlows.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1.2 }}
+              className="mb-16"
+            >
+              <div className="flex items-center justify-center gap-4 mb-8">
+                <FaPause className="text-yellow-400 text-2xl" />
+                <h3 className="text-3xl font-bold text-white">
+                  Inactive Flows ({inactiveFlows.length})
+                </h3>
+                <FaPause className="text-yellow-400 text-2xl" />
+              </div>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {inactiveFlows.map((flow, index) => (
+                  <motion.div
+                    key={flow._id}
+                    initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                  >
+                    <FlowDiagram
+                      flow={flow}
+                      onEdit={handleEditFlow}
+                      onDelete={handleDeleteFlow}
+                      onToggle={handleToggleFlow}
+                    />
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+
+          {/* Empty State */}
+          {flows.length === 0 && !isLoading && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 1.4 }}
+              className="bg-white/10 backdrop-blur-xl rounded-3xl border border-white/20 shadow-2xl p-16 text-center"
+            >
+              <div className="w-24 h-24 bg-gradient-to-r from-blue-500 to-purple-500 rounded-3xl flex items-center justify-center mx-auto mb-8">
+                <FaRobot className="text-4xl text-white" />
+              </div>
+              <h3 className="text-3xl font-bold text-white mb-4">
+                No Auto Reply Flows Yet
+              </h3>
+              <p className="text-white/80 text-lg mb-8 max-w-md mx-auto">
+                Create your first intelligent auto reply flow to start engaging
+                with your customers automatically
+              </p>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleCreateFlow}
+                className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-4 rounded-2xl font-bold text-lg shadow-2xl hover:from-purple-700 hover:to-pink-700 transition-all duration-300 flex items-center gap-3"
+              >
+                <FaMagic />
+                Create Your First Flow
+                <FaArrowRight />
+              </motion.button>
+            </motion.div>
+          )}
+
+          {/* Loading State */}
+          {isLoading && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="flex justify-center items-center py-32"
+            >
+              <div className="flex flex-col items-center gap-4">
+                <div className="relative">
+                  <div className="animate-spin rounded-full h-16 w-16 border-4 border-white/20 border-t-purple-500"></div>
+                  <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 opacity-20"></div>
+                </div>
+                <p className="text-white/80 font-medium">
+                  Loading your flows...
+                </p>
+              </div>
+            </motion.div>
+          )}
+        </motion.div>
+      </div>
 
       {/* Flow Builder Modal */}
       <FlowBuilder
@@ -265,7 +417,7 @@ const AutoReplyPage = () => {
         onSave={handleSaveFlow}
         editingFlow={editingFlow}
       />
-    </section>
+    </div>
   );
 };
 

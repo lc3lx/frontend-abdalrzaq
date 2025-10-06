@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
+import Navbar from "../components/Navbar";
 import {
   FaCog,
   FaPlus,
@@ -11,12 +12,9 @@ import {
   FaRobot,
   FaWallet,
   FaCrown,
-  FaShoppingBag,
-  FaUsers,
   FaCalendarAlt,
   FaBell,
   FaSearch,
-  FaMoon,
   FaSun,
   FaSignOutAlt,
 } from "react-icons/fa";
@@ -40,8 +38,8 @@ const Dashboard = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState("overview");
-  const [darkMode, setDarkMode] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [windowSize, setWindowSize] = useState({ width: 1920, height: 1080 });
   const {
     stats,
     isLoading: statsLoading,
@@ -54,6 +52,20 @@ const Dashboard = () => {
       navigate("/admin/dashboard");
     }
   }, [user.role, navigate]);
+
+  // Handle window resize for particles
+  useEffect(() => {
+    const updateSize = () => {
+      setWindowSize({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    };
+
+    updateSize();
+    window.addEventListener("resize", updateSize);
+    return () => window.removeEventListener("resize", updateSize);
+  }, []);
 
   const sections = [
     {
@@ -194,7 +206,7 @@ const Dashboard = () => {
             مرحباً، {user.username}! 👋
           </motion.h1>
           <motion.p
-            className="text-blue-100 text-lg"
+            className="text-white/80 text-lg"
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.4, duration: 0.6 }}
@@ -215,9 +227,9 @@ const Dashboard = () => {
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 mb-1">{stat.label}</p>
+                <p className="text-sm text-white/70 mb-1">{stat.label}</p>
                 <motion.p
-                  className="text-3xl font-bold text-gray-900"
+                  className="text-3xl font-bold text-white"
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{
@@ -254,13 +266,13 @@ const Dashboard = () => {
 
       {/* Recent Activity */}
       <AnimatedCard className="p-6">
-        <h2 className="text-xl font-bold text-gray-900 mb-6">
+        <h2 className="text-xl font-bold text-white mb-6">
           النشاط الأخير (آخر 7 أيام)
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="flex items-center justify-between p-4 bg-blue-50 rounded-xl">
             <div>
-              <p className="text-sm text-gray-600">منشورات جديدة</p>
+              <p className="text-sm text-white/70">منشورات جديدة</p>
               <p className="text-2xl font-bold text-blue-600">
                 {statsLoading ? "..." : stats.recentActivity.posts}
               </p>
@@ -269,7 +281,7 @@ const Dashboard = () => {
           </div>
           <div className="flex items-center justify-between p-4 bg-green-50 rounded-xl">
             <div>
-              <p className="text-sm text-gray-600">رسائل جديدة</p>
+              <p className="text-sm text-white/70">رسائل جديدة</p>
               <p className="text-2xl font-bold text-green-600">
                 {statsLoading ? "..." : stats.recentActivity.messages}
               </p>
@@ -281,7 +293,7 @@ const Dashboard = () => {
 
       {/* Quick Actions */}
       <AnimatedCard className="p-6">
-        <h2 className="text-xl font-bold text-gray-900 mb-6">إجراءات سريعة</h2>
+        <h2 className="text-xl font-bold text-white mb-6">إجراءات سريعة</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <AnimatedButton
             variant="primary"
@@ -339,12 +351,51 @@ const Dashboard = () => {
   };
 
   return (
-    <div
-      className={`min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100 ${
-        darkMode ? "dark" : ""
-      }`}
-    >
-      {/* Animated Background Elements */}
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
+      <Navbar />
+
+      {/* Animated Background */}
+      <motion.div
+        className="absolute inset-0"
+        animate={{
+          background: [
+            "radial-gradient(600px circle at 20% 30%, #3b82f6 0%, transparent 50%)",
+            "radial-gradient(600px circle at 80% 70%, #8b5cf6 0%, transparent 50%)",
+            "radial-gradient(600px circle at 40% 80%, #ec4899 0%, transparent 50%)",
+            "radial-gradient(600px circle at 20% 30%, #3b82f6 0%, transparent 50%)",
+          ],
+        }}
+        transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+      />
+
+      {/* Floating Particles */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {[...Array(20)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute w-2 h-2 bg-blue-400/20 rounded-full"
+            animate={{
+              x: [
+                Math.random() * windowSize.width,
+                Math.random() * windowSize.width,
+              ],
+              y: [
+                Math.random() * windowSize.height,
+                Math.random() * windowSize.height,
+              ],
+              opacity: [0, 1, 0],
+            }}
+            transition={{
+              duration: Math.random() * 20 + 10,
+              repeat: Infinity,
+              delay: Math.random() * 5,
+              ease: "linear",
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Previous Animated Background Elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         {[...Array(5)].map((_, i) => (
           <motion.div
@@ -379,7 +430,7 @@ const Dashboard = () => {
         <motion.div
           variants={sidebarVariants}
           animate={sidebarCollapsed ? "collapsed" : "expanded"}
-          className="bg-white/80 backdrop-blur-lg border-r border-gray-200/50 shadow-xl relative z-10"
+          className="bg-white/10 backdrop-blur-xl border-r border-white/20 shadow-2xl relative z-10"
         >
           <div className="p-6">
             {/* Logo */}
@@ -421,8 +472,8 @@ const Dashboard = () => {
                       activeSection === section.id
                         ? "bg-gradient-to-r " +
                           section.color +
-                          " text-glow-white shadow-lg"
-                        : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                          " text-white shadow-lg"
+                        : "text-white/80 hover:bg-white/10 hover:text-white"
                     }
                   `}
                 >
@@ -448,7 +499,7 @@ const Dashboard = () => {
           <div className="absolute bottom-6 left-6 right-6">
             <motion.button
               onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-              className="w-full flex items-center justify-center p-3 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-xl transition-colors"
+              className="w-full flex items-center justify-center p-3 text-white/60 hover:text-white hover:bg-white/10 rounded-xl transition-colors"
             >
               <motion.div
                 animate={{ rotate: sidebarCollapsed ? 180 : 0 }}
@@ -461,16 +512,16 @@ const Dashboard = () => {
         </motion.div>
 
         {/* Main Content */}
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col pt-20">
           {/* Top Header */}
           <motion.header
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white/80 backdrop-blur-lg border-b border-gray-200/50 px-8 py-4"
+            className="bg-white/10 backdrop-blur-xl border-b border-white/20 px-8 py-4"
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <h2 className="text-2xl font-bold text-gray-900">
+                <h2 className="text-2xl font-bold text-white">
                   {sections.find((s) => s.id === activeSection)?.label ||
                     "نظرة عامة"}
                 </h2>
@@ -479,11 +530,11 @@ const Dashboard = () => {
               <div className="flex items-center gap-4">
                 {/* Search */}
                 <div className="relative">
-                  <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60 w-4 h-4" />
                   <input
                     type="text"
                     placeholder="بحث..."
-                    className="pl-10 pr-4 py-2 bg-gray-100 rounded-xl border-0 focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
+                    className="pl-10 pr-4 py-2 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/50 focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all backdrop-blur-sm"
                   />
                 </div>
 
@@ -491,14 +542,9 @@ const Dashboard = () => {
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => setDarkMode(!darkMode)}
-                  className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-xl transition-colors"
+                  className="p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-xl transition-colors"
                 >
-                  {darkMode ? (
-                    <FaSun className="w-5 h-5" />
-                  ) : (
-                    <FaMoon className="w-5 h-5" />
-                  )}
+                  <FaSun className="w-5 h-5" />
                 </motion.button>
 
                 {/* Notifications */}
@@ -514,7 +560,7 @@ const Dashboard = () => {
                 {/* User Menu */}
                 <div className="flex items-center gap-3">
                   <div className="text-right">
-                    <p className="text-sm font-medium text-gray-900">
+                    <p className="text-sm font-medium text-white">
                       {user.username}
                     </p>
                     <p className="text-xs text-gray-500">{user.email}</p>
