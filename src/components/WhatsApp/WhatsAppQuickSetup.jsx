@@ -8,6 +8,7 @@ import {
   FaExternalLinkAlt,
 } from "react-icons/fa";
 import axios from "axios";
+import { API_ENDPOINTS } from "../../config.js";
 
 const WhatsAppQuickSetup = ({ onClose, onSuccess }) => {
   const [step, setStep] = useState(1);
@@ -30,7 +31,7 @@ const WhatsAppQuickSetup = ({ onClose, onSuccess }) => {
       const token = localStorage.getItem("token");
 
       const response = await axios.post(
-        "http://localhost:5000/api/whatsapp/quick-setup",
+        API_ENDPOINTS.whatsappQuickSetup,
         {
           phoneNumberId,
           accessToken,
@@ -70,7 +71,7 @@ const WhatsAppQuickSetup = ({ onClose, onSuccess }) => {
       const token = localStorage.getItem("token");
 
       const response = await axios.post(
-        "http://localhost:5000/api/whatsapp/test-message",
+        API_ENDPOINTS.whatsappTestMessage,
         { phoneNumber: testPhoneNumber, message: testMessage },
         {
           headers: { Authorization: `Bearer ${token}` },
