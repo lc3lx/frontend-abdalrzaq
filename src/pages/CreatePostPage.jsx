@@ -26,6 +26,7 @@ const CreatePostPage = () => {
 
   const [postContent, setPostContent] = useState("");
   const [imageUrl, setImageUrl] = useState(null);
+  const [imageFile, setImageFile] = useState(null);
   const [selectedPlatforms, setSelectedPlatforms] = useState([]);
   const [windowSize, setWindowSize] = useState({ width: 1920, height: 1080 });
 
