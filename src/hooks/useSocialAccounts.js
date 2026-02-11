@@ -36,6 +36,13 @@ export const useSocialAccounts = () => {
       });
 
       const authUrl = response.data.url;
+      if (response.data.redirectUri) {
+        const domain = new URL(response.data.redirectUri).hostname;
+        console.log(
+          "[فيسبوك] إذا ظهر خطأ النطاق، أضف في تطبيق فيسبوك → نطاقات التطبيق:",
+          domain
+        );
+      }
       const width = 600;
       const height = 700;
       const left = window.screenX + (window.outerWidth - width) / 2;
