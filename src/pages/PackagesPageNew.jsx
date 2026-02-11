@@ -393,14 +393,16 @@ const PackagesPageNew = () => {
                         className="flex items-center gap-3"
                       >
                         <FaCheck className="text-green-400 flex-shrink-0" />
-                        <span className="text-gray-300 text-sm">{feature}</span>
+                        <span className="text-gray-300 text-sm">
+                          {typeof feature === "object" ? (feature?.nameAr || feature?.name || "") : String(feature)}
+                        </span>
                       </motion.div>
                     ))}
 
                     {/* Services */}
                     {pkg.services?.map((service, serviceIndex) => (
                       <motion.div
-                        key={serviceIndex}
+                        key={service?.type || serviceIndex}
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.2 + serviceIndex * 0.05 }}
@@ -408,7 +410,7 @@ const PackagesPageNew = () => {
                       >
                         <FaBolt className="text-blue-400 flex-shrink-0" />
                         <span className="text-gray-300 text-sm capitalize">
-                          {service}
+                          {typeof service === "object" ? (service?.nameAr || service?.name || service?.type || "") : String(service)}
                         </span>
                       </motion.div>
                     ))}

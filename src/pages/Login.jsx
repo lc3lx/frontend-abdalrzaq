@@ -36,10 +36,10 @@ const Login = () => {
       localStorage.setItem("token", response.data.token);
       localStorage.setItem("userEmail", response.data.email);
       const role = (response.data.role || "user").toString().toLowerCase().trim();
-      localStorage.setItem("userRole", role);
+      localStorage.setItem("userRole", role === "admlin" ? "admin" : role);
 
-      // Redirect based on user role
-      if (role === "admin") {
+      // Redirect based on user role (admlin = typo for admin)
+      if (role === "admin" || role === "admlin") {
         navigate("/admin/dashboard", { replace: true });
       } else {
         navigate("/dashboard", { replace: true });
