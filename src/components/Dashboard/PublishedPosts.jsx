@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { API_ENDPOINTS } from "../../config";
 import {
   FaTwitter,
   FaFacebook,
@@ -26,7 +27,7 @@ const PublishedPosts = () => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.get(
-        "http://localhost:5000/api/posts/published",
+        API_ENDPOINTS.publishedPosts,
         {
           headers: { Authorization: `Bearer ${token}` },
           withCredentials: true,
@@ -47,7 +48,7 @@ const PublishedPosts = () => {
       setIsSyncing(true);
       const token = localStorage.getItem("token");
       const response = await axios.post(
-        "http://localhost:5000/api/posts/sync-engagement",
+        API_ENDPOINTS.syncEngagement,
         {},
         {
           headers: { Authorization: `Bearer ${token}` },

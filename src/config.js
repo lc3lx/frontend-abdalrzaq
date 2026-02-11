@@ -24,6 +24,8 @@ export const API_ENDPOINTS = {
   post: `${API_BASE_URL}/api/post`,
   schedulePost: `${API_BASE_URL}/api/schedule-post`,
   scheduledPosts: `${API_BASE_URL}/api/scheduled-posts`,
+  publishedPosts: `${API_BASE_URL}/api/posts/published`,
+  syncEngagement: `${API_BASE_URL}/api/posts/sync-engagement`,
   
   // Messages
   messages: `${API_BASE_URL}/api/messages`,
