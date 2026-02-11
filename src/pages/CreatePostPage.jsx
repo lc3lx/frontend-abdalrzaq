@@ -163,7 +163,8 @@ const CreatePostPage = () => {
       setImageUrl(null);
       setSelectedPlatforms([]);
     } catch (error) {
-      alert(`Error: ${error.response?.data?.error || "Unknown error"}`);
+      const msg = error.response?.data?.message || error.response?.data?.error || error.message || "Unknown error";
+      alert(`Error: ${msg}`);
     }
   };
 

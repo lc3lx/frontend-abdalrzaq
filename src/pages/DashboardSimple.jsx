@@ -234,7 +234,8 @@ const Dashboard = () => {
       setSelectedPlatforms([]);
     } catch (error) {
       console.error("Post error:", error.response?.data || error.message);
-      alert(`Error: ${error.response?.data?.error || "Unknown error"}`);
+      const msg = error.response?.data?.message || error.response?.data?.error || error.message || "Unknown error";
+      alert(`Error: ${msg}`);
     } finally {
       setIsPosting(false);
       setPostingProgress("");
