@@ -103,6 +103,20 @@ const PublishedPosts = () => {
     return url.startsWith("/") ? base + url : base + "/" + url;
   };
 
+  const getEngagement = (post) => {
+    const e = post?.engagement;
+    if (!e || typeof e !== "object") {
+      return { likes: 0, comments: 0, shares: 0, retweets: 0, lastUpdated: post?.publishedAt || new Date() };
+    }
+    return {
+      likes: Number(e.likes) || 0,
+      comments: Number(e.comments) || 0,
+      shares: Number(e.shares) || 0,
+      retweets: Number(e.retweets) || 0,
+      lastUpdated: e.lastUpdated || post?.publishedAt || new Date(),
+    };
+  };
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -127,16 +141,21 @@ const PublishedPosts = () => {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-800">Published Posts</h2>
-        <button
-          onClick={syncEngagement}
-          disabled={isSyncing}
-          className="bg-green-600 text-white px-4 py-2 rounded-full hover:bg-green-700 transition-transform duration-300 transform hover:scale-105 disabled:bg-gray-400 flex items-center gap-2"
-        >
-          <FaSync className={isSyncing ? "animate-spin" : ""} />
-          {isSyncing ? "Syncing..." : "Sync Engagement"}
-        </button>
+      <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
+        <h2 className="text-2xl font-bold text-gray-800">المنشورات المنشورة</h2>
+        <div className="flex items-center gap-3">
+          <p className="text-sm text-gray-500 hidden sm:block">
+            اضغط لتحديث الإعجابات والتعليقات والمشاركات من المنصات
+          </p>
+          <button
+            onClick={syncEngagement}
+            disabled={isSyncing}
+            className="bg-green-600 text-white px-4 py-2 rounded-full hover:bg-green-700 transition-transform duration-300 transform hover:scale-105 disabled:bg-gray-400 flex items-center gap-2"
+          >
+            <FaSync className={isSyncing ? "animate-spin" : ""} />
+            {isSyncing ? "جاري التحديث..." : "تحديث التفاعل"}
+          </button>
+        </div>
       </div>
 
       {publishedPosts.length === 0 ? (
@@ -195,39 +214,36 @@ const PublishedPosts = () => {
                 )}
               </div>
 
-              {/* Engagement Metrics */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                <div className="bg-blue-50 p-3 rounded-lg text-center">
-                  <FaHeart className="text-red-500 mx-auto mb-1" />
-                  <p className="text-sm text-gray-600">Likes</p>
-                  <p className="text-lg font-bold text-gray-800">
-                    {post.engagement.likes}
-                  </p>
-                </div>
-                <div className="bg-green-50 p-3 rounded-lg text-center">
-                  <FaComment className="text-blue-500 mx-auto mb-1" />
-                  <p className="text-sm text-gray-600">Comments</p>
-                  <p className="text-lg font-bold text-gray-800">
-                    {post.engagement.comments}
-                  </p>
-                </div>
-                {post.platform === "Twitter" && (
-                  <div className="bg-blue-50 p-3 rounded-lg text-center">
-                    <FaRetweet className="text-green-500 mx-auto mb-1" />
-                    <p className="text-sm text-gray-600">Retweets</p>
-                    <p className="text-lg font-bold text-gray-800">
-                      {post.engagement.retweets}
-                    </p>
+              {/* Engagement Metrics - الاعجابات والتعليقات والمشاركات */}
+              {(() => {
+                const eng = getEngagement(post);
+                return (
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                    <div className="bg-red-50 p-3 rounded-lg text-center border border-red-100">
+                      <FaHeart className="text-red-500 mx-auto mb-1 text-xl" />
+                      <p className="text-sm text-gray-600">إعجابات</p>
+                      <p className="text-lg font-bold text-gray-800">{eng.likes}</p>
+                    </div>
+                    <div className="bg-blue-50 p-3 rounded-lg text-center border border-blue-100">
+                      <FaComment className="text-blue-500 mx-auto mb-1 text-xl" />
+                      <p className="text-sm text-gray-600">تعليقات</p>
+                      <p className="text-lg font-bold text-gray-800">{eng.comments}</p>
+                    </div>
+                    <div className="bg-purple-50 p-3 rounded-lg text-center border border-purple-100">
+                      <FaShare className="text-purple-500 mx-auto mb-1 text-xl" />
+                      <p className="text-sm text-gray-600">مشاركات</p>
+                      <p className="text-lg font-bold text-gray-800">{eng.shares}</p>
+                    </div>
+                    {post.platform === "Twitter" && (
+                      <div className="bg-green-50 p-3 rounded-lg text-center border border-green-100">
+                        <FaRetweet className="text-green-500 mx-auto mb-1 text-xl" />
+                        <p className="text-sm text-gray-600">إعادات تغريد</p>
+                        <p className="text-lg font-bold text-gray-800">{eng.retweets}</p>
+                      </div>
+                    )}
                   </div>
-                )}
-                <div className="bg-purple-50 p-3 rounded-lg text-center">
-                  <FaShare className="text-purple-500 mx-auto mb-1" />
-                  <p className="text-sm text-gray-600">Shares</p>
-                  <p className="text-lg font-bold text-gray-800">
-                    {post.engagement.shares}
-                  </p>
-                </div>
-              </div>
+                );
+              })()}
 
               {/* Comments Section */}
               {post.comments && post.comments.length > 0 && (
@@ -252,7 +268,7 @@ const PublishedPosts = () => {
                         <p className="text-gray-700 text-sm">
                           {comment.content}
                         </p>
-                        {comment.engagement.likes > 0 && (
+                        {(comment.engagement?.likes ?? 0) > 0 && (
                           <div className="flex items-center gap-1 mt-2">
                             <FaHeart className="text-red-500 text-xs" />
                             <span className="text-xs text-gray-500">
@@ -267,7 +283,7 @@ const PublishedPosts = () => {
               )}
 
               <div className="text-xs text-gray-400 mt-3">
-                Last updated: {formatDate(post.engagement.lastUpdated)}
+                آخر تحديث للتفاعل: {formatDate(getEngagement(post).lastUpdated)}
               </div>
             </div>
           ))}
