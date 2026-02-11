@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { API_ENDPOINTS } from "../../config";
+import { API_ENDPOINTS, API_BASE_URL } from "../../config";
 import {
   FaTwitter,
   FaFacebook,
@@ -95,6 +95,14 @@ const PublishedPosts = () => {
     });
   };
 
+  const toFullMediaUrl = (url) => {
+    if (!url) return null;
+    if (typeof url !== "string") return null;
+    if (url.startsWith("http://") || url.startsWith("https://")) return url;
+    const base = API_BASE_URL.replace(/\/$/, "");
+    return url.startsWith("/") ? base + url : base + "/" + url;
+  };
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -164,10 +172,22 @@ const PublishedPosts = () => {
 
               <div className="mb-4">
                 <p className="text-gray-800 leading-relaxed">{post.content}</p>
-                {post.imageUrl && (
+                {post.videoUrl && (
+                  <div className="mt-3">
+                    <video
+                      src={toFullMediaUrl(post.videoUrl)}
+                      controls
+                      className="max-w-md rounded-lg shadow-md"
+                      playsInline
+                    >
+                      Your browser does not support the video tag.
+                    </video>
+                  </div>
+                )}
+                {post.imageUrl && !post.videoUrl && (
                   <div className="mt-3">
                     <img
-                      src={post.imageUrl}
+                      src={toFullMediaUrl(post.imageUrl)}
                       alt="Post image"
                       className="max-w-sm rounded-lg shadow-md"
                     />
