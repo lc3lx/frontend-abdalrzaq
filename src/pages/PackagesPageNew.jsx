@@ -75,15 +75,15 @@ const PackagesPageNew = () => {
       setPurchasing(packageId);
       const token = localStorage.getItem("token");
       const response = await axios.post(
-        `https://www.sushiluha.com/api/packages/purchase/${packageId}`,
-        {},
+        "https://www.sushiluha.com/api/packages/purchase",
+        { packageId },
         {
           headers: { Authorization: `Bearer ${token}` },
           withCredentials: true,
         }
       );
 
-      if (response.data.success) {
+      if (response.data) {
         alert("تم شراء الباقة بنجاح!");
         fetchUserSubscription();
       }
