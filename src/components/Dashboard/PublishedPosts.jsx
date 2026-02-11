@@ -67,6 +67,7 @@ const PublishedPosts = () => {
         if (fb.error) parts.push(`فيسبوك: ${fb.error}`);
         else if (fb.updated !== undefined) parts.push(`فيسبوك: ${fb.updated} منشور محدث`);
         if (fb.errors?.length) parts.push(fb.errors.map((e) => e.message).join("؛ "));
+        if (fb.permissionHint) parts.push("\n" + fb.permissionHint);
       }
       if (data.Twitter?.updated !== undefined) parts.push(`تويتر: ${data.Twitter.updated} منشور محدث`);
       if (data.LinkedIn?.updated !== undefined) parts.push(`لينكدإن: ${data.LinkedIn.updated} منشور محدث`);
