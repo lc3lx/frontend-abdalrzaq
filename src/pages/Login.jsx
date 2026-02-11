@@ -35,16 +35,14 @@ const Login = () => {
       });
       localStorage.setItem("token", response.data.token);
       localStorage.setItem("userEmail", response.data.email);
-      localStorage.setItem("userRole", response.data.role || "user");
+      const role = (response.data.role || "user").toString().toLowerCase().trim();
+      localStorage.setItem("userRole", role);
 
       // Redirect based on user role
-      console.log("User role:", response.data.role);
-      if (response.data.role === "admin") {
-        console.log("Redirecting admin to admin dashboard");
-        navigate("/admin/dashboard");
+      if (role === "admin") {
+        navigate("/admin/dashboard", { replace: true });
       } else {
-        console.log("Redirecting user to regular dashboard");
-        navigate("/dashboard");
+        navigate("/dashboard", { replace: true });
       }
     } catch (err) {
       setError(err.response?.data?.error || "Login failed");
