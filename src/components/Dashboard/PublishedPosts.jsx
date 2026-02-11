@@ -56,15 +56,26 @@ const PublishedPosts = () => {
         }
       );
 
-      console.log("Engagement sync results:", response.data);
+      const data = response.data;
+      console.log("Engagement sync results:", data);
 
-      // Refresh posts after sync
       await fetchPublishedPosts();
 
-      alert("Engagement data synced successfully!");
+      const parts = [];
+      if (data.Facebook) {
+        const fb = data.Facebook;
+        if (fb.error) parts.push(`فيسبوك: ${fb.error}`);
+        else if (fb.updated !== undefined) parts.push(`فيسبوك: ${fb.updated} منشور محدث`);
+        if (fb.errors?.length) parts.push(fb.errors.map((e) => e.message).join("؛ "));
+      }
+      if (data.Twitter?.updated !== undefined) parts.push(`تويتر: ${data.Twitter.updated} منشور محدث`);
+      if (data.LinkedIn?.updated !== undefined) parts.push(`لينكدإن: ${data.LinkedIn.updated} منشور محدث`);
+      const msg = parts.length ? parts.join("\n") : "تم تحديث التفاعل.";
+      alert(msg);
     } catch (error) {
       console.error("Error syncing engagement:", error);
-      alert("Failed to sync engagement data");
+      const errMsg = error.response?.data?.error || error.message || "فشل تحديث التفاعل";
+      alert("خطأ: " + errMsg);
     } finally {
       setIsSyncing(false);
     }
