@@ -8,6 +8,7 @@ import {
   FaExclamationTriangle,
 } from "react-icons/fa";
 import axios from "axios";
+import { API_ENDPOINTS } from "../config";
 
 const SubscriptionStatus = () => {
   const [subscription, setSubscription] = useState(null);
@@ -27,7 +28,7 @@ const SubscriptionStatus = () => {
       }
 
       const response = await axios.get(
-        "http://localhost:5000/api/packages/my-subscription",
+        API_ENDPOINTS.mySubscription,
         {
           headers: { Authorization: `Bearer ${token}` },
           withCredentials: true,

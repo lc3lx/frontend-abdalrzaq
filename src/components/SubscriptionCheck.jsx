@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaLock, FaShoppingBag, FaExclamationTriangle } from "react-icons/fa";
 import axios from "axios";
+import { API_ENDPOINTS } from "../config";
 
 const SubscriptionCheck = ({ serviceType, children, fallback = null }) => {
   const [hasAccess, setHasAccess] = useState(null);
@@ -24,7 +25,7 @@ const SubscriptionCheck = ({ serviceType, children, fallback = null }) => {
 
       // Get user's subscription
       const response = await axios.get(
-        "http://localhost:5000/api/packages/my-subscription",
+        API_ENDPOINTS.mySubscription,
         {
           headers: { Authorization: `Bearer ${token}` },
           withCredentials: true,
