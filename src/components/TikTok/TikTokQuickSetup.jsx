@@ -19,7 +19,7 @@ const TikTokQuickSetup = ({ onClose, onSuccess }) => {
       const token = localStorage.getItem("token");
 
       const response = await axios.get(
-        "http://localhost:5000/api/tiktok/auth",
+        "https://www.sushiluha.com/api/tiktok/auth",
         {
           headers: { Authorization: `Bearer ${token}` },
           withCredentials: true,
@@ -123,9 +123,7 @@ const TikTokQuickSetup = ({ onClose, onSuccess }) => {
                   <li>أنشئ تطبيق جديد</li>
                   <li>أضف TikTok for Business API</li>
                   <li>احصل على Client Key و Client Secret</li>
-                  <li>
-                    أضف Redirect URI: http://localhost:5000/api/tiktok/callback
-                  </li>
+                  <li>أضف Redirect URI: https://www.sushiluha.com/api/tiktok/callback</li>
                 </ol>
               </div>
 
