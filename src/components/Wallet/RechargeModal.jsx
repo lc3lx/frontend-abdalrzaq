@@ -68,7 +68,7 @@ const RechargeModal = ({ isOpen, onClose, onRechargeSuccess }) => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.post(
-        "http://localhost:5000/api/wallet/recharge",
+        "https://www.sushiluha.com/api/wallet/recharge",
         {
           method: selectedMethod,
           amount: parseFloat(amount),

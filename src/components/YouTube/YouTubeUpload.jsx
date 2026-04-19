@@ -94,7 +94,7 @@ const YouTubeUpload = ({ onClose, onSuccess }) => {
       formDataToSend.append("privacyStatus", formData.privacyStatus);
 
       const response = await axios.post(
-        "http://localhost:5000/api/youtube/upload",
+        "https://www.sushiluha.com/api/youtube/upload",
         formDataToSend,
         {
           headers: {

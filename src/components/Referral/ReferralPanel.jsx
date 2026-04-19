@@ -30,7 +30,7 @@ const ReferralPanel = () => {
       }
 
       const response = await axios.get(
-        "http://localhost:5000/api/referral/my-referrals",
+        "https://www.sushiluha.com/api/referral/my-referrals",
         {
           headers: { Authorization: `Bearer ${token}` },
           withCredentials: true,

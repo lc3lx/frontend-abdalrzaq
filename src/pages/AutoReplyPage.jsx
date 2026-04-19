@@ -6,7 +6,6 @@ import FlowBuilder from "../components/AutoReply/FlowBuilder";
 import SubscriptionCheck from "../components/SubscriptionCheck";
 import TelegramQuickConnect from "../components/Telegram/TelegramQuickConnect";
 import WhatsAppQuickConnect from "../components/WhatsApp/WhatsAppQuickConnect";
-import Navbar from "../components/Navbar";
 import {
   FaPlay,
   FaPause,
@@ -124,56 +123,12 @@ const AutoReplyPage = () => {
   const inactiveFlows = flows.filter((flow) => !flow.isActive);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
-      <Navbar />
-
-      {/* Animated Background */}
-      <motion.div
-        className="absolute inset-0"
-        animate={{
-          background: [
-            "radial-gradient(600px circle at 20% 30%, #3b82f6 0%, transparent 50%)",
-            "radial-gradient(600px circle at 80% 70%, #8b5cf6 0%, transparent 50%)",
-            "radial-gradient(600px circle at 40% 80%, #ec4899 0%, transparent 50%)",
-            "radial-gradient(600px circle at 20% 30%, #3b82f6 0%, transparent 50%)",
-          ],
-        }}
-        transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-      />
-
-      {/* Floating Particles */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(20)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute w-2 h-2 bg-blue-400/20 rounded-full"
-            animate={{
-              x: [
-                Math.random() * windowSize.width,
-                Math.random() * windowSize.width,
-              ],
-              y: [
-                Math.random() * windowSize.height,
-                Math.random() * windowSize.height,
-              ],
-              opacity: [0, 1, 0],
-            }}
-            transition={{
-              duration: Math.random() * 20 + 10,
-              repeat: Infinity,
-              delay: Math.random() * 5,
-              ease: "linear",
-            }}
-          />
-        ))}
-      </div>
-
-      {/* Main Content */}
-      <div className="relative z-10 pt-20 px-6 py-20">
+    <div className="relative">
+      <div className="relative z-10 pt-8 pb-20">
         <motion.div
-          initial={{ opacity: 0, y: 50 }}
+          initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 0.2 }}
+          transition={{ duration: 0.8 }}
           className="max-w-7xl mx-auto"
         >
           {/* Header */}
@@ -409,7 +364,6 @@ const AutoReplyPage = () => {
           )}
         </motion.div>
       </div>
-
       {/* Flow Builder Modal */}
       <FlowBuilder
         isOpen={showCreateModal}

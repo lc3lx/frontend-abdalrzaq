@@ -163,13 +163,13 @@ const InboxPage = () => {
   };
 
   return (
-    <section>
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-800">Inbox</h2>
+    <div className="space-y-6 max-w-6xl mx-auto">
+      <div className="flex justify-between items-center mb-8">
+        <h2 className="text-3xl font-bold text-white">Inbox</h2>
         <button
           onClick={handleSync}
           disabled={isLoading}
-          className="bg-green-600 text-white px-4 py-2 rounded-full hover:bg-green-700 transition-transform duration-300 transform hover:scale-105 disabled:bg-gray-400 flex items-center gap-2"
+          className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-xl disabled:opacity-50 flex items-center gap-2 font-semibold"
         >
           <FaSync className={isLoading ? "animate-spin" : ""} />
           Sync Messages
@@ -177,24 +177,24 @@ const InboxPage = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white p-4 rounded-lg shadow-md border-t-4 border-blue-500">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="bg-white/10 backdrop-blur-xl border border-white/20 p-6 rounded-2xl shadow-xl">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">Total Messages</p>
-              <p className="text-2xl font-bold text-gray-800">{stats.total}</p>
+              <p className="text-sm text-white/70">Total Messages</p>
+              <p className="text-3xl font-bold text-white">{stats.total}</p>
             </div>
-            <FaEnvelope className="text-blue-500 text-2xl" />
+            <FaEnvelope className="text-blue-400 text-3xl" />
           </div>
         </div>
 
-        <div className="bg-white p-4 rounded-lg shadow-md border-t-4 border-red-500">
+        <div className="bg-white/10 backdrop-blur-xl border border-white/20 p-6 rounded-2xl shadow-xl">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">Unread</p>
-              <p className="text-2xl font-bold text-gray-800">{stats.unread}</p>
+              <p className="text-sm text-white/70">Unread</p>
+              <p className="text-3xl font-bold text-white">{stats.unread}</p>
             </div>
-            <FaEnvelopeOpen className="text-red-500 text-2xl" />
+            <FaEnvelopeOpen className="text-red-400 text-3xl" />
           </div>
         </div>
 
@@ -205,19 +205,21 @@ const InboxPage = () => {
           return (
             <div
               key={platform}
-              className="bg-white p-4 rounded-lg shadow-md border-t-4 border-gray-400"
+              className="bg-white/10 backdrop-blur-xl border border-white/20 p-6 rounded-2xl shadow-xl"
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600">{platform}</p>
-                  <p className="text-lg font-bold text-gray-800">
+                  <p className="text-sm text-white/70">{platform}</p>
+                  <p className="text-2xl font-bold text-white">
                     {data.total}
                   </p>
                   {data.unread > 0 && (
-                    <p className="text-xs text-red-500">{data.unread} unread</p>
+                    <p className="text-sm text-red-400 font-semibold mt-1">{data.unread} unread</p>
                   )}
                 </div>
-                {getPlatformIcon(platform)}
+                <div className="text-2xl bg-white/5 p-3 rounded-xl border border-white/10">
+                    {getPlatformIcon(platform)}
+                </div>
               </div>
             </div>
           );
@@ -225,21 +227,23 @@ const InboxPage = () => {
       </div>
 
       {/* Filters */}
-      <div className="bg-white p-4 rounded-lg shadow-md mb-6">
+      <div className="bg-white/10 backdrop-blur-xl p-6 rounded-2xl shadow-xl mt-6">
         <div className="flex flex-wrap gap-4 items-center">
           <div className="flex items-center gap-2">
-            <FaFilter className="text-gray-500" />
-            <span className="text-sm font-medium text-gray-700">Filters:</span>
+            <div className="w-10 h-10 bg-purple-500/20 rounded-xl flex items-center justify-center">
+                <FaFilter className="text-purple-400" />
+            </div>
+            <span className="text-sm font-semibold text-white/90">Filters:</span>
           </div>
 
           <select
             value={filters.platform}
             onChange={(e) => handleFilterChange("platform", e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-400 transition-all appearance-none"
           >
-            <option value="">All Platforms</option>
+            <option value="" className="bg-slate-800">All Platforms</option>
             {platforms.map((platform) => (
-              <option key={platform.name} value={platform.name}>
+              <option key={platform.name} value={platform.name} className="bg-slate-800">
                 {platform.name}
               </option>
             ))}
@@ -248,56 +252,58 @@ const InboxPage = () => {
           <select
             value={filters.isRead}
             onChange={(e) => handleFilterChange("isRead", e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-400 transition-all appearance-none"
           >
-            <option value="">All Messages</option>
-            <option value="false">Unread Only</option>
-            <option value="true">Read Only</option>
+            <option value="" className="bg-slate-800">All Messages</option>
+            <option value="false" className="bg-slate-800">Unread Only</option>
+            <option value="true" className="bg-slate-800">Read Only</option>
           </select>
 
-          <div className="flex items-center gap-2 flex-1">
-            <FaSearch className="text-gray-500" />
+          <div className="flex items-center gap-2 flex-1 relative">
+            <FaSearch className="absolute left-4 text-white/50" />
             <input
               type="text"
               placeholder="Search messages..."
               value={filters.search}
               onChange={(e) => handleSearch(e.target.value)}
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full pl-12 pr-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-purple-400 transition-all"
             />
           </div>
         </div>
       </div>
 
       {/* Messages List */}
-      <div className="bg-white rounded-lg shadow-md">
+      <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-xl mt-8 overflow-hidden">
         {messages.length === 0 ? (
-          <div className="p-8 text-center">
-            <FaEnvelope className="text-gray-400 text-4xl mx-auto mb-4" />
-            <p className="text-gray-600 text-lg">No messages found</p>
-            <p className="text-gray-500 text-sm mt-2">
+          <div className="p-16 text-center text-white">
+            <div className="w-24 h-24 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6">
+                <FaEnvelope className="text-white/40 text-5xl" />
+            </div>
+            <p className="text-xl font-semibold mb-2">No messages found</p>
+            <p className="text-white/60">
               {filters.platform || filters.isRead || filters.search
-                ? "Try adjusting your filters"
-                : "Sync your social media accounts to see messages"}
+                ? "Try adjusting your filters to see more results."
+                : "Sync your social media accounts to start receiving messages."}
             </p>
           </div>
         ) : (
           <>
             {/* Bulk Actions */}
             {selectedMessages.length > 0 && (
-              <div className="p-4 bg-blue-50 border-b flex items-center justify-between">
-                <span className="text-sm text-blue-700">
+              <div className="p-4 bg-purple-900/40 border-b border-white/10 flex items-center justify-between">
+                <span className="font-semibold text-purple-200">
                   {selectedMessages.length} message(s) selected
                 </span>
-                <div className="flex gap-2">
+                <div className="flex gap-3">
                   <button
                     onClick={() => handleBulkAction("read")}
-                    className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700"
+                    className="bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-purple-700 transition"
                   >
                     Mark as Read
                   </button>
                   <button
                     onClick={() => handleBulkAction("archive")}
-                    className="bg-gray-600 text-white px-3 py-1 rounded text-sm hover:bg-gray-700"
+                    className="bg-white/20 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-white/30 transition"
                   >
                     Archive
                   </button>
@@ -305,13 +311,13 @@ const InboxPage = () => {
               </div>
             )}
 
-            <div className="divide-y divide-gray-200">
+            <div className="divide-y divide-white/10">
               {messages.map((message) => (
                 <div
                   key={message._id}
-                  className={`p-4 hover:bg-gray-50 transition-colors ${
+                  className={`p-6 hover:bg-white/5 transition-all duration-300 ${
                     !message.isRead
-                      ? "bg-blue-50 border-l-4 border-blue-500"
+                      ? "bg-purple-900/20 border-l-4 border-purple-500"
                       : ""
                   }`}
                 >
@@ -320,53 +326,55 @@ const InboxPage = () => {
                       type="checkbox"
                       checked={selectedMessages.includes(message._id)}
                       onChange={() => handleSelectMessage(message._id)}
-                      className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      className="mt-1.5 h-5 w-5 text-purple-600 border-white/30 rounded bg-white/10 focus:ring-purple-500"
                     />
 
                     <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        {getPlatformIcon(message.platform)}
-                        <span className="font-medium text-gray-800">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="bg-white/10 p-2 rounded-lg">
+                            {getPlatformIcon(message.platform)}
+                        </div>
+                        <span className="font-bold text-lg text-white">
                           {message.senderName}
                         </span>
                         {message.senderUsername && (
-                          <span className="text-gray-500 text-sm">
+                          <span className="text-white/50 text-sm">
                             @{message.senderUsername}
                           </span>
                         )}
-                        <span className="text-gray-500 text-sm">
+                        <span className="text-white/40 text-sm ml-auto">
                           {formatDate(message.receivedAt)}
                         </span>
                         {!message.isRead && (
-                          <span className="bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
+                          <span className="bg-purple-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
                             New
                           </span>
                         )}
                       </div>
 
-                      <p className="text-gray-700 mb-2">
+                      <p className="text-white/80 mb-4 ml-12 text-lg leading-relaxed">
                         {truncateText(message.content)}
                       </p>
 
                       {message.attachments &&
                         message.attachments.length > 0 && (
-                          <div className="flex gap-2 mb-2">
+                          <div className="flex gap-2 mb-2 ml-12">
                             {message.attachments.map((attachment, index) => (
                               <span
                                 key={index}
-                                className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded"
+                                className="bg-white/10 border border-white/20 text-white/80 text-xs px-3 py-1.5 rounded-lg flex items-center gap-2"
                               >
-                                📎 {attachment.mediaType || "attachment"}
+                                📎 {attachment.mediaType || "Photo"}
                               </span>
                             ))}
                           </div>
                         )}
                     </div>
 
-                    <div className="flex gap-2">
+                    <div className="flex flex-col gap-3">
                       <button
                         onClick={() => handleReply(message)}
-                        className="text-green-600 hover:text-green-800 p-1"
+                        className="text-green-400 hover:text-green-300 bg-green-400/10 hover:bg-green-400/20 p-3 rounded-xl transition-all"
                         title="Reply"
                       >
                         <FaReply />
@@ -374,7 +382,7 @@ const InboxPage = () => {
                       {!message.isRead && (
                         <button
                           onClick={() => handleMarkAsRead(message._id)}
-                          className="text-blue-600 hover:text-blue-800 p-1"
+                          className="text-blue-400 hover:text-blue-300 bg-blue-400/10 hover:bg-blue-400/20 p-3 rounded-xl transition-all"
                           title="Mark as read"
                         >
                           <FaEye />
@@ -382,7 +390,7 @@ const InboxPage = () => {
                       )}
                       <button
                         onClick={() => handleArchive(message._id)}
-                        className="text-gray-600 hover:text-gray-800 p-1"
+                        className="text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 p-3 rounded-xl transition-all"
                         title="Archive"
                       >
                         <FaArchive />
@@ -395,19 +403,19 @@ const InboxPage = () => {
 
             {/* Pagination */}
             {pagination.pages > 1 && (
-              <div className="p-4 border-t flex justify-between items-center">
+              <div className="p-6 border-t border-white/10 flex justify-between items-center bg-white/5">
                 <button
                   onClick={() =>
                     fetchMessages({ ...filters, page: pagination.current - 1 })
                   }
                   disabled={!pagination.hasPrev}
-                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-6 py-2 bg-white/10 text-white font-medium rounded-lg hover:bg-white/20 disabled:opacity-50 transition border border-white/10"
                 >
                   Previous
                 </button>
 
-                <span className="text-sm text-gray-600">
-                  Page {pagination.current} of {pagination.pages}
+                <span className="text-sm font-medium text-white/70">
+                  Page <span className="text-white">{pagination.current}</span> of <span className="text-white">{pagination.pages}</span>
                 </span>
 
                 <button
@@ -415,7 +423,7 @@ const InboxPage = () => {
                     fetchMessages({ ...filters, page: pagination.current + 1 })
                   }
                   disabled={!pagination.hasNext}
-                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-6 py-2 bg-white/10 text-white font-medium rounded-lg hover:bg-white/20 disabled:opacity-50 transition border border-white/10"
                 >
                   Next
                 </button>
@@ -433,7 +441,7 @@ const InboxPage = () => {
         message={replyModal.message}
         isLoading={isReplying}
       />
-    </section>
+    </div>
   );
 };
 

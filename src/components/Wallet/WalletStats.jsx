@@ -26,7 +26,7 @@ const WalletStats = ({ wallet }) => {
       }
 
       const response = await axios.get(
-        `http://localhost:5000/api/wallet/summary?period=${period}`,
+        `https://www.sushiluha.com/api/wallet/summary?period=${period}`,
         {
           headers: { Authorization: `Bearer ${token}` },
           withCredentials: true,

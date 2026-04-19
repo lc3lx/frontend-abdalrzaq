@@ -111,7 +111,7 @@ const AddCardModal = ({ isOpen, onClose, onCardAdded }) => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.post(
-        "http://localhost:5000/api/wallet/cards",
+        "https://www.sushiluha.com/api/wallet/cards",
         {
           ...formData,
           cardNumber: formData.cardNumber.replace(/\s/g, ""),

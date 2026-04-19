@@ -127,10 +127,12 @@ const IntegrationsPage = () => {
   };
 
   return (
-    <section>
-      <h2 className="text-2xl font-bold text-gray-800 mb-6">Integrations</h2>
-      {isLoading && <p className="text-gray-600 text-center">Loading...</p>}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+    <div className="space-y-6 max-w-6xl mx-auto">
+      <div className="flex justify-between items-center mb-8">
+        <h2 className="text-3xl font-bold text-white">Integrations</h2>
+      </div>
+      {isLoading && <p className="text-white/60 text-center text-lg">Loading...</p>}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {platforms.map(({ name, icon: Icon, color, bgColor, serviceType }) => {
           const isConnected = connectedAccounts.some(
             (acc) => acc.platform === name
@@ -138,15 +140,17 @@ const IntegrationsPage = () => {
 
           return (
             <SubscriptionCheck key={name} serviceType={serviceType}>
-              <div className="bg-white p-6 rounded-xl shadow-lg border-t-2 flex items-center justify-between">
+              <div className="bg-white/10 backdrop-blur-xl border border-white/20 p-6 rounded-2xl shadow-xl flex items-center justify-between hover:bg-white/20 transition-all duration-300">
                 <div className="flex items-center">
-                  <Icon className={`${color} text-3xl mr-4`} />
+                  <div className="w-14 h-14 bg-white/5 rounded-xl border border-white/10 flex items-center justify-center mr-4">
+                    <Icon className={`${color} text-3xl`} />
+                  </div>
                   <div>
-                    <h3 className="text-xl font-semibold text-gray-800">
+                    <h3 className="text-xl font-bold text-white">
                       {name}
                     </h3>
                     {isConnected ? (
-                      <p className="text-green-600 text-sm">
+                      <p className="text-green-400 text-sm font-medium mt-1">
                         Connected as{" "}
                         {
                           connectedAccounts.find((acc) => acc.platform === name)
@@ -154,14 +158,14 @@ const IntegrationsPage = () => {
                         }
                       </p>
                     ) : (
-                      <p className="text-gray-600 text-sm">Not connected</p>
+                      <p className="text-white/50 text-sm font-medium mt-1">Not connected</p>
                     )}
                   </div>
                 </div>
                 {isConnected ? (
                   <button
                     onClick={() => handleDisconnect(name)}
-                    className="bg-red-600 text-white px-4 py-2 rounded-full hover:bg-red-700 transition-transform duration-300 transform hover:scale-105"
+                    className="bg-red-500/10 text-red-400 border border-red-500/30 px-5 py-2.5 rounded-xl font-bold hover:bg-red-500 hover:text-white transition-all shadow-lg"
                     disabled={isLoading}
                   >
                     Disconnect
@@ -169,7 +173,7 @@ const IntegrationsPage = () => {
                 ) : (
                   <button
                     onClick={() => handleConnect(name)}
-                    className={`${bgColor} text-white px-4 py-2 rounded-full hover:opacity-80 transition-transform duration-300 transform hover:scale-105`}
+                    className={`${bgColor} text-white px-5 py-2.5 rounded-xl font-bold hover:opacity-80 transition-transform duration-300 transform hover:scale-105 shadow-lg`}
                     disabled={isLoading}
                   >
                     Connect
@@ -217,7 +221,7 @@ const IntegrationsPage = () => {
           }}
         />
       )}
-    </section>
+    </div>
   );
 };
 

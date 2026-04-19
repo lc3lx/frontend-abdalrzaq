@@ -52,7 +52,7 @@ const GiftModal = ({ isOpen, onClose, onGiftSuccess, wallet }) => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.post(
-        "http://localhost:5000/api/wallet/gift",
+        "https://www.sushiluha.com/api/wallet/gift",
         {
           amount: parseFloat(amount),
           recipientEmail,

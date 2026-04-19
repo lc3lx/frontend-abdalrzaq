@@ -48,7 +48,7 @@ const TransactionList = ({ wallet, refreshKey }) => {
       if (filter === "recharge") {
         // Fetch recharge requests
         response = await axios.get(
-          "http://localhost:5000/api/wallet/recharge-requests",
+          "https://www.sushiluha.com/api/wallet/recharge-requests",
           {
             headers: { Authorization: `Bearer ${token}` },
             withCredentials: true,
@@ -65,7 +65,7 @@ const TransactionList = ({ wallet, refreshKey }) => {
       } else {
         // Fetch regular transactions
         response = await axios.get(
-          `http://localhost:5000/api/wallet/transactions?page=${page}&limit=10&type=${
+          `https://www.sushiluha.com/api/wallet/transactions?page=${page}&limit=10&type=${
             filter === "all" ? "" : filter
           }`,
           {

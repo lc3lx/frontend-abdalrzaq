@@ -20,7 +20,7 @@ const QuickTelegramSetup = ({ onClose, onSuccess }) => {
       const token = localStorage.getItem("token");
       
       const response = await axios.post(
-        "http://localhost:5000/api/telegram/quick-setup",
+        "https://www.sushiluha.com/api/telegram/quick-setup",
         { botToken, botUsername },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -32,7 +32,7 @@ const QuickTelegramSetup = ({ onClose, onSuccess }) => {
         setStep(2);
         // Get connection URL
         const urlResponse = await axios.get(
-          "http://localhost:5000/api/telegram/connection-url",
+          "https://www.sushiluha.com/api/telegram/connection-url",
           {
             headers: { Authorization: `Bearer ${token}` },
             withCredentials: true,

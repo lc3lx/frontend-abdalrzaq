@@ -23,7 +23,7 @@ const YouTubeQuickSetup = ({ onClose, onSuccess }) => {
       const token = localStorage.getItem("token");
 
       const response = await axios.get(
-        "http://localhost:5000/api/youtube/auth",
+        "https://www.sushiluha.com/api/youtube/auth",
         {
           headers: { Authorization: `Bearer ${token}` },
           withCredentials: true,
@@ -74,7 +74,7 @@ const YouTubeQuickSetup = ({ onClose, onSuccess }) => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.get(
-        "http://localhost:5000/api/youtube/channel",
+        "https://www.sushiluha.com/api/youtube/channel",
         {
           headers: { Authorization: `Bearer ${token}` },
           withCredentials: true,
@@ -147,7 +147,7 @@ const YouTubeQuickSetup = ({ onClose, onSuccess }) => {
                   <li>أنشئ OAuth 2.0 credentials</li>
                   <li>احصل على Client ID و Client Secret</li>
                   <li>
-                    أضف Redirect URI: http://localhost:5000/api/youtube/callback
+                    أضف Redirect URI: https://www.sushiluha.com/api/youtube/callback
                   </li>
                 </ol>
               </div>
