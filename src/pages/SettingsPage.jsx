@@ -50,18 +50,18 @@ const SettingsPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
+    <div className="app-bg min-h-screen relative overflow-hidden">
       <Navbar />
 
       {/* Animated Background */}
       <motion.div
-        className="absolute inset-0"
+        className="absolute inset-0 opacity-30"
         animate={{
           background: [
-            "radial-gradient(600px circle at 20% 30%, #3b82f6 0%, transparent 50%)",
-            "radial-gradient(600px circle at 80% 70%, #8b5cf6 0%, transparent 50%)",
-            "radial-gradient(600px circle at 40% 80%, #ec4899 0%, transparent 50%)",
-            "radial-gradient(600px circle at 20% 30%, #3b82f6 0%, transparent 50%)",
+            "radial-gradient(600px circle at 20% 30%, #18d5bd 0%, transparent 50%)",
+            "radial-gradient(600px circle at 80% 70%, #f5b84b 0%, transparent 50%)",
+            "radial-gradient(600px circle at 40% 80%, #f05776 0%, transparent 50%)",
+            "radial-gradient(600px circle at 20% 30%, #18d5bd 0%, transparent 50%)",
           ],
         }}
         transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
@@ -72,7 +72,7 @@ const SettingsPage = () => {
         {[...Array(20)].map((_, i) => (
           <motion.div
             key={i}
-            className="absolute w-2 h-2 bg-blue-400/20 rounded-full"
+            className="absolute w-2 h-2 bg-teal-300/15 rounded-full"
             animate={{
               x: [
                 Math.random() * windowSize.width,
@@ -109,7 +109,7 @@ const SettingsPage = () => {
             transition={{ delay: 0.4 }}
             className="text-center mb-12"
           >
-            <div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-500 rounded-3xl flex items-center justify-center mx-auto mb-6">
+            <div className="w-20 h-20 bg-gradient-to-br from-teal-300 via-amber-300 to-rose-400 rounded-2xl flex items-center justify-center mx-auto mb-6 text-slate-950 shadow-glow">
               <FaCog className="text-3xl text-white" />
             </div>
             <h1 className="text-5xl lg:text-6xl font-black text-white mb-4">
@@ -125,7 +125,7 @@ const SettingsPage = () => {
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6 }}
-            className="bg-white/10 backdrop-blur-xl rounded-3xl p-8 lg:p-12 border border-white/20 shadow-2xl"
+            className="premium-panel rounded-2xl p-8 lg:p-12"
           >
             <div className="mb-8">
               <div className="flex items-center gap-3 mb-6">
@@ -163,7 +163,7 @@ const SettingsPage = () => {
                   </label>
                   <input
                     type="text"
-                    className="w-full px-4 py-4 bg-white/10 border border-white/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-300 text-white placeholder-white/50 backdrop-blur-sm"
+                    className="premium-input"
                     value={newUsername}
                     onChange={(e) => setNewUsername(e.target.value)}
                     placeholder="Enter new username"
@@ -175,7 +175,7 @@ const SettingsPage = () => {
                   </label>
                   <input
                     type="password"
-                    className="w-full px-4 py-4 bg-white/10 border border-white/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-300 text-white placeholder-white/50 backdrop-blur-sm"
+                    className="premium-input"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     placeholder="Enter new password"
@@ -186,7 +186,7 @@ const SettingsPage = () => {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     type="submit"
-                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-2xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 flex items-center justify-center gap-3"
+                    className="premium-button w-full text-lg"
                   >
                     <FaSave />
                     Update Profile

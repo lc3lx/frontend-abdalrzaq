@@ -49,7 +49,7 @@ const AdminDashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
+      <div className="app-bg min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
       </div>
     );
@@ -57,7 +57,7 @@ const AdminDashboard = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
+      <div className="app-bg min-h-screen flex items-center justify-center">
         <div className="text-center">
           <FaExclamationTriangle className="text-red-500 text-4xl mx-auto mb-4" />
           <p className="text-red-600 text-lg">{error}</p>
@@ -118,37 +118,37 @@ const AdminDashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+    <div className="app-bg min-h-screen">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
             <div className="text-center lg:text-right">
-              <h1 className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-3">
+              <h1 className="text-4xl lg:text-5xl font-black bg-gradient-to-r from-teal-300 via-amber-200 to-rose-300 bg-clip-text text-transparent mb-3 tracking-normal">
                 لوحة تحكم الإدارة
               </h1>
-              <p className="text-gray-600 text-lg">
+              <p className="text-white/70 text-lg">
                 نظرة عامة شاملة على إحصائيات النظام وإدارة المستخدمين
               </p>
             </div>
             <div className="flex flex-wrap justify-center lg:justify-end gap-3">
               <button
                 onClick={() => navigate("/admin/users")}
-                className="group flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+                className="premium-button group"
               >
                 <FaUsers className="text-lg group-hover:scale-110 transition-transform" />
                 <span className="font-semibold">إدارة المستخدمين</span>
               </button>
               <button
                 onClick={() => navigate("/admin/payments")}
-                className="group flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl hover:from-emerald-700 hover:to-emerald-800 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+                className="premium-muted-button group"
               >
                 <FaWallet className="text-lg group-hover:scale-110 transition-transform" />
                 <span className="font-semibold">إدارة المدفوعات</span>
               </button>
               <button
                 onClick={() => navigate("/admin/packages")}
-                className="group flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl hover:from-purple-700 hover:to-purple-800 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+                className="premium-muted-button group"
               >
                 <FaShoppingBag className="text-lg group-hover:scale-110 transition-transform" />
                 <span className="font-semibold">إدارة الباقات</span>

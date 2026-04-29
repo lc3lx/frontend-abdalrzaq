@@ -204,7 +204,7 @@ const IntegrationsPageNew = () => {
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-          className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl mb-6"
+          className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-teal-300 via-amber-300 to-rose-400 rounded-2xl mb-6 text-slate-950 shadow-glow"
         >
           <FaPlug className="w-8 h-8 text-glow-white" />
         </motion.div>
@@ -265,7 +265,7 @@ const IntegrationsPageNew = () => {
                 flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all duration-300
                 ${
                   selectedCategory === category.id
-                    ? "bg-gradient-to-r from-blue-600 to-purple-600 text-glow-white shadow-lg"
+                    ? "bg-gradient-to-r from-teal-400 to-amber-300 text-slate-950 shadow-lg"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }
               `}
@@ -290,7 +290,7 @@ const IntegrationsPageNew = () => {
             initial={{ width: 0 }}
             animate={{ width: `${(connectedCount / totalPlatforms) * 100}%` }}
             transition={{ duration: 1, ease: "easeOut" }}
-            className="bg-gradient-to-r from-blue-600 to-purple-600 h-3 rounded-full"
+            className="bg-gradient-to-r from-teal-400 via-amber-300 to-rose-400 h-3 rounded-full"
           />
         </div>
       </AnimatedCard>

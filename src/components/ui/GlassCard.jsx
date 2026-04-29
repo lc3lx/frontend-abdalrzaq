@@ -53,11 +53,11 @@ const GlassCard = ({
       viewport={{ once: true, threshold: 0.1 }}
       className={`
         relative group cursor-pointer
-        bg-white/10 backdrop-blur-xl
-        border border-white/20 rounded-3xl
-        shadow-2xl hover:shadow-3xl
+        bg-white/[0.08] backdrop-blur-2xl
+        border border-white/10 rounded-2xl
+        shadow-2xl hover:shadow-premium
         transition-all duration-500
-        ${glow ? "hover:shadow-blue-500/25" : ""}
+        ${glow ? "hover:shadow-teal-500/20" : ""}
         ${className}
       `}
       style={{
@@ -67,10 +67,10 @@ const GlassCard = ({
     >
       {/* Animated Border */}
       <motion.div
-        className="absolute inset-0 rounded-3xl"
+        className="absolute inset-0 rounded-2xl"
         animate={{
           background: isHovered
-            ? "linear-gradient(45deg, #3b82f6, #8b5cf6, #ec4899, #3b82f6)"
+            ? "linear-gradient(45deg, #18d5bd, #f5b84b, #f05776, #18d5bd)"
             : "linear-gradient(45deg, transparent, transparent, transparent, transparent)",
         }}
         transition={{ duration: 0.5 }}
@@ -80,7 +80,7 @@ const GlassCard = ({
         }}
       >
         <motion.div
-          className="w-full h-full bg-white/5 backdrop-blur-xl rounded-3xl"
+          className="w-full h-full bg-white/5 backdrop-blur-xl rounded-2xl"
           animate={{
             backgroundPosition: isHovered ? ["0% 0%", "100% 100%"] : "0% 0%",
           }}
@@ -90,7 +90,7 @@ const GlassCard = ({
 
       {/* Shine Effect */}
       <motion.div
-        className="absolute inset-0 rounded-3xl overflow-hidden"
+        className="absolute inset-0 rounded-2xl overflow-hidden"
         initial={{ opacity: 0 }}
         animate={{ opacity: isHovered ? 1 : 0 }}
         transition={{ duration: 0.3 }}
@@ -107,11 +107,11 @@ const GlassCard = ({
 
       {/* Floating Particles */}
       {isHovered && (
-        <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-3xl">
+        <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-2xl">
           {[...Array(8)].map((_, i) => (
             <motion.div
               key={i}
-              className="absolute w-1 h-1 bg-blue-400 rounded-full"
+              className="absolute w-1 h-1 bg-teal-300 rounded-full"
               initial={{
                 x: Math.random() * 100 + "%",
                 y: "100%",
@@ -137,11 +137,11 @@ const GlassCard = ({
       {/* Glow Effect */}
       {glow && (
         <motion.div
-          className="absolute inset-0 rounded-3xl -z-10"
+          className="absolute inset-0 rounded-2xl -z-10"
           animate={{
             boxShadow: isHovered
-              ? "0 0 50px rgba(59, 130, 246, 0.4), 0 0 100px rgba(59, 130, 246, 0.2)"
-              : "0 0 0px rgba(59, 130, 246, 0)",
+              ? "0 0 50px rgba(24, 213, 189, 0.28), 0 0 100px rgba(245, 184, 75, 0.14)"
+              : "0 0 0px rgba(24, 213, 189, 0)",
           }}
           transition={{ duration: 0.5 }}
         />

@@ -50,18 +50,18 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
+    <div className="app-bg min-h-screen relative overflow-hidden">
       <Navbar />
 
       {/* Animated Background */}
       <motion.div
-        className="absolute inset-0"
+        className="absolute inset-0 opacity-35"
         animate={{
           background: [
-            "radial-gradient(600px circle at 20% 30%, #3b82f6 0%, transparent 50%)",
-            "radial-gradient(600px circle at 80% 70%, #8b5cf6 0%, transparent 50%)",
-            "radial-gradient(600px circle at 40% 80%, #ec4899 0%, transparent 50%)",
-            "radial-gradient(600px circle at 20% 30%, #3b82f6 0%, transparent 50%)",
+            "radial-gradient(600px circle at 20% 30%, #18d5bd 0%, transparent 50%)",
+            "radial-gradient(600px circle at 80% 70%, #f5b84b 0%, transparent 50%)",
+            "radial-gradient(600px circle at 40% 80%, #f05776 0%, transparent 50%)",
+            "radial-gradient(600px circle at 20% 30%, #18d5bd 0%, transparent 50%)",
           ],
         }}
         transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
@@ -102,7 +102,7 @@ const Login = () => {
           transition={{ duration: 1, delay: 0.2 }}
           className="w-full max-w-md"
         >
-          <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-8 lg:p-12 border border-white/20 shadow-2xl">
+          <div className="premium-panel rounded-2xl p-8 lg:p-12">
             {/* Header */}
             <motion.div
               initial={{ opacity: 0, y: -20 }}
@@ -110,10 +110,10 @@ const Login = () => {
               transition={{ delay: 0.4 }}
               className="text-center mb-8"
             >
-              <div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-500 rounded-3xl flex items-center justify-center mx-auto mb-6">
+              <div className="w-20 h-20 bg-gradient-to-br from-teal-300 via-amber-300 to-rose-400 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-glow">
                 <FaSignInAlt className="text-3xl text-white" />
               </div>
-              <h1 className="text-4xl lg:text-5xl font-black text-white mb-4">
+              <h1 className="text-4xl lg:text-5xl font-black text-white mb-4 tracking-normal">
                 Welcome Back
               </h1>
               <p className="text-white/80">Sign in to your Sushiluha account</p>
@@ -146,7 +146,7 @@ const Login = () => {
                 <div className="relative">
                   <input
                     type="email"
-                    className="w-full px-4 py-4 bg-white/10 border border-white/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-300 text-white placeholder-white/50 backdrop-blur-sm"
+                    className="premium-input"
                     placeholder="Enter your email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -163,7 +163,7 @@ const Login = () => {
                 <div className="relative">
                   <input
                     type={showPassword ? "text" : "password"}
-                    className="w-full px-4 py-4 bg-white/10 border border-white/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-300 text-white placeholder-white/50 backdrop-blur-sm pr-12"
+                    className="premium-input pr-12"
                     placeholder="Enter your password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -184,7 +184,7 @@ const Login = () => {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 type="submit"
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-2xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 flex items-center justify-center gap-3"
+                className="premium-button w-full text-lg"
               >
                 <FaSignInAlt />
                 Sign In
@@ -215,7 +215,7 @@ const Login = () => {
               </p>
               <Link
                 to="/register"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-white/10 backdrop-blur-lg rounded-xl text-white font-semibold hover:bg-white/20 transition-all duration-300 border border-white/20"
+                className="premium-muted-button"
               >
                 <FaUserPlus />
                 Create Account

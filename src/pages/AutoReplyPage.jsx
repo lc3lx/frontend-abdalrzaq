@@ -138,7 +138,7 @@ const AutoReplyPage = () => {
             transition={{ delay: 0.4 }}
             className="text-center mb-16"
           >
-            <div className="w-24 h-24 bg-gradient-to-r from-blue-500 to-purple-500 rounded-3xl flex items-center justify-center mx-auto mb-8">
+            <div className="w-24 h-24 bg-gradient-to-br from-teal-300 via-amber-300 to-rose-400 rounded-2xl flex items-center justify-center mx-auto mb-8 text-slate-950 shadow-glow">
               <FaProjectDiagram className="text-4xl text-white" />
             </div>
             <h1 className="text-6xl lg:text-7xl font-black text-white mb-6">
@@ -158,7 +158,7 @@ const AutoReplyPage = () => {
               <SubscriptionCheck serviceType="auto_reply">
                 <button
                   onClick={handleCreateFlow}
-                  className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-4 rounded-2xl font-bold text-lg shadow-2xl hover:from-purple-700 hover:to-pink-700 transition-all duration-300 flex items-center gap-3"
+                  className="premium-button text-lg"
                 >
                   <FaMagic />
                   Create New Flow
@@ -175,10 +175,10 @@ const AutoReplyPage = () => {
             transition={{ delay: 0.6 }}
             className="grid md:grid-cols-2 gap-8 mb-16"
           >
-            <div className="bg-white/10 backdrop-blur-xl rounded-3xl border border-white/20 shadow-2xl p-8">
+            <div className="premium-panel rounded-2xl p-8">
               <TelegramQuickConnect onTelegramConnected={fetchFlows} />
             </div>
-            <div className="bg-white/10 backdrop-blur-xl rounded-3xl border border-white/20 shadow-2xl p-8">
+            <div className="premium-panel rounded-2xl p-8">
               <WhatsAppQuickConnect onWhatsAppConnected={fetchFlows} />
             </div>
           </motion.div>
@@ -196,7 +196,7 @@ const AutoReplyPage = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
               <motion.div
                 whileHover={{ scale: 1.05, y: -5 }}
-                className="bg-gradient-to-br from-blue-500 to-blue-600 p-8 rounded-3xl text-center shadow-2xl"
+                className="bg-gradient-to-br from-teal-400 to-cyan-600 p-8 rounded-2xl text-center shadow-2xl"
               >
                 <FaRobot className="text-4xl text-white mx-auto mb-4" />
                 <div className="text-3xl font-black text-white mb-2">
@@ -207,7 +207,7 @@ const AutoReplyPage = () => {
 
               <motion.div
                 whileHover={{ scale: 1.05, y: -5 }}
-                className="bg-gradient-to-br from-green-500 to-green-600 p-8 rounded-3xl text-center shadow-2xl"
+                className="bg-gradient-to-br from-emerald-400 to-teal-600 p-8 rounded-2xl text-center shadow-2xl"
               >
                 <FaPlay className="text-4xl text-white mx-auto mb-4" />
                 <div className="text-3xl font-black text-white mb-2">
@@ -218,7 +218,7 @@ const AutoReplyPage = () => {
 
               <motion.div
                 whileHover={{ scale: 1.05, y: -5 }}
-                className="bg-gradient-to-br from-yellow-500 to-orange-500 p-8 rounded-3xl text-center shadow-2xl"
+                className="bg-gradient-to-br from-amber-300 to-orange-500 p-8 rounded-2xl text-center shadow-2xl"
               >
                 <FaPause className="text-4xl text-white mx-auto mb-4" />
                 <div className="text-3xl font-black text-white mb-2">
@@ -229,7 +229,7 @@ const AutoReplyPage = () => {
 
               <motion.div
                 whileHover={{ scale: 1.05, y: -5 }}
-                className="bg-gradient-to-br from-purple-500 to-purple-600 p-8 rounded-3xl text-center shadow-2xl"
+                className="bg-gradient-to-br from-rose-400 to-fuchsia-600 p-8 rounded-2xl text-center shadow-2xl"
               >
                 <FaChartBar className="text-4xl text-white mx-auto mb-4" />
                 <div className="text-3xl font-black text-white mb-2">
@@ -319,9 +319,9 @@ const AutoReplyPage = () => {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 1.4 }}
-              className="bg-white/10 backdrop-blur-xl rounded-3xl border border-white/20 shadow-2xl p-16 text-center"
+              className="premium-panel rounded-2xl p-16 text-center"
             >
-              <div className="w-24 h-24 bg-gradient-to-r from-blue-500 to-purple-500 rounded-3xl flex items-center justify-center mx-auto mb-8">
+              <div className="w-24 h-24 bg-gradient-to-br from-teal-300 via-amber-300 to-rose-400 rounded-2xl flex items-center justify-center mx-auto mb-8 text-slate-950 shadow-glow">
                 <FaRobot className="text-4xl text-white" />
               </div>
               <h3 className="text-3xl font-bold text-white mb-4">
@@ -335,7 +335,7 @@ const AutoReplyPage = () => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={handleCreateFlow}
-                className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-4 rounded-2xl font-bold text-lg shadow-2xl hover:from-purple-700 hover:to-pink-700 transition-all duration-300 flex items-center gap-3"
+                className="premium-button text-lg"
               >
                 <FaMagic />
                 Create Your First Flow
@@ -353,8 +353,8 @@ const AutoReplyPage = () => {
             >
               <div className="flex flex-col items-center gap-4">
                 <div className="relative">
-                  <div className="animate-spin rounded-full h-16 w-16 border-4 border-white/20 border-t-purple-500"></div>
-                  <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 opacity-20"></div>
+                  <div className="animate-spin rounded-full h-16 w-16 border-4 border-white/20 border-t-teal-300"></div>
+                  <div className="absolute inset-0 rounded-full bg-gradient-to-r from-teal-300 to-amber-300 opacity-20"></div>
                 </div>
                 <p className="text-white/80 font-medium">
                   Loading your flows...

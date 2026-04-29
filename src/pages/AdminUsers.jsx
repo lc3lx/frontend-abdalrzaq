@@ -170,30 +170,30 @@ const AdminUsers = () => {
 
   if (loading && users.length === 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
+      <div className="app-bg min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+    <div className="app-bg min-h-screen">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
             <div className="text-center lg:text-right">
-              <h1 className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-3">
+              <h1 className="text-4xl lg:text-5xl font-black bg-gradient-to-r from-teal-300 via-amber-200 to-rose-300 bg-clip-text text-transparent mb-3 tracking-normal">
                 إدارة المستخدمين
               </h1>
-              <p className="text-gray-600 text-lg">
+              <p className="text-white/70 text-lg">
                 إدارة شاملة للمستخدمين والحسابات والصلاحيات
               </p>
             </div>
             <div className="flex justify-center lg:justify-end">
               <button
                 onClick={() => navigate("/admin/dashboard")}
-                className="group flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+                className="premium-button group"
               >
                 <FaUsers className="text-lg group-hover:scale-110 transition-transform" />
                 <span className="font-semibold">العودة للوحة التحكم</span>
@@ -203,7 +203,7 @@ const AdminUsers = () => {
         </div>
 
         {/* Filters */}
-        <div className="bg-white rounded-2xl shadow-xl p-8 mb-8 border border-gray-100">
+        <div className="rounded-2xl border border-white/20 bg-white/95 p-8 mb-8 shadow-2xl">
           <div className="text-center mb-6">
             <h2 className="text-xl font-bold text-gray-800 mb-2">
               فلاتر البحث

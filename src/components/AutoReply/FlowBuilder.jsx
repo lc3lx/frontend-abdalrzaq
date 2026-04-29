@@ -201,7 +201,7 @@ const FlowBuilder = ({ isOpen, onClose, onSave, editingFlow }) => {
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center z-50 p-4 pt-20">
-      <div className="bg-[#1a1b2e]/95 backdrop-blur-2xl border border-white/10 rounded-3xl shadow-2xl shadow-indigo-500/20 max-w-6xl w-full max-h-[85vh] overflow-y-auto mt-16 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
+      <div className="premium-panel max-w-6xl w-full max-h-[85vh] overflow-y-auto mt-16 rounded-2xl scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
         <div className="p-8">
           {/* Header */}
           <div className="flex justify-between items-center mb-8 pb-4 border-b border-white/10">

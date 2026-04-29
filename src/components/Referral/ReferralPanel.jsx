@@ -172,7 +172,7 @@ const ReferralPanel = () => {
       </div>
 
       {/* Referral Link Section */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-6 text-white mb-8">
+      <div className="rounded-xl bg-gradient-to-r from-teal-400 via-amber-300 to-rose-400 p-6 text-slate-950 mb-8 shadow-2xl">
         <h3 className="text-xl font-bold mb-4">رابط الإحالة الخاص بك</h3>
         <div className="flex items-center gap-4">
           <div className="flex-1 bg-white/20 backdrop-blur-sm rounded-lg px-4 py-3">

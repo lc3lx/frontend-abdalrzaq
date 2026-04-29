@@ -17,19 +17,19 @@ const AnimatedButton = ({
 
   const variants = {
     primary:
-      "bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl",
+      "bg-gradient-to-r from-teal-400 via-amber-300 to-rose-400 text-slate-950 shadow-2xl shadow-teal-500/15",
     secondary:
-      "bg-white hover:bg-gray-50 text-gray-900 border border-gray-300 shadow-sm hover:shadow-md",
+      "bg-white/[0.08] hover:bg-white/[0.14] text-white border border-white/10 shadow-xl backdrop-blur-xl",
     success:
-      "bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white shadow-lg hover:shadow-xl",
+      "bg-gradient-to-r from-emerald-400 to-teal-500 text-slate-950 shadow-2xl shadow-emerald-500/15",
     warning:
-      "bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white shadow-lg hover:shadow-xl",
+      "bg-gradient-to-r from-amber-300 to-orange-400 text-slate-950 shadow-2xl shadow-amber-500/15",
     danger:
-      "bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white shadow-lg hover:shadow-xl",
+      "bg-gradient-to-r from-rose-500 to-red-600 text-white shadow-2xl shadow-rose-500/15",
     ghost:
-      "bg-transparent hover:bg-gray-100 text-gray-700 border border-transparent hover:border-gray-300",
+      "bg-transparent hover:bg-white/[0.1] text-white border border-white/10",
     social:
-      "bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg hover:shadow-xl",
+      "bg-gradient-to-r from-cyan-400 via-violet-400 to-fuchsia-400 text-slate-950 shadow-2xl shadow-cyan-500/15",
   };
 
   const sizes = {
@@ -50,7 +50,8 @@ const AnimatedButton = ({
   const buttonVariants = {
     initial: { scale: 1 },
     hover: {
-      scale: 1.05,
+      scale: 1.025,
+      y: -1,
       transition: { duration: 0.2, ease: "easeOut" },
     },
     tap: {
@@ -92,8 +93,8 @@ const AnimatedButton = ({
       onClick={handleClick}
       className={`
         relative inline-flex items-center justify-center gap-2 
-        rounded-xl font-semibold transition-all duration-300 
-        focus:outline-none focus:ring-4 focus:ring-blue-500/20
+        rounded-xl font-bold transition-all duration-300 
+        focus:outline-none focus:ring-4 focus:ring-teal-300/25
         overflow-hidden
         ${variants[variant]}
         ${sizes[size]}

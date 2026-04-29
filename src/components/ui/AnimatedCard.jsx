@@ -55,10 +55,11 @@ const AnimatedCard = ({
 
   const cardVariants = {
     default: "bg-white border border-gray-200 shadow-lg hover:shadow-xl",
-    glass: "bg-white/20 backdrop-blur-lg border border-white/30 shadow-xl",
+    glass:
+      "bg-white/[0.08] backdrop-blur-2xl border border-white/10 shadow-2xl",
     gradient:
-      "bg-gradient-to-br from-blue-50 to-indigo-100 border border-blue-200 shadow-lg",
-    dark: "bg-gray-800 border border-gray-700 shadow-xl text-white",
+      "bg-gradient-to-br from-teal-400/14 via-white/[0.08] to-rose-400/12 border border-white/10 shadow-2xl",
+    dark: "bg-[#0b1718]/90 border border-white/10 shadow-2xl text-white",
   };
 
   return (
@@ -74,14 +75,14 @@ const AnimatedCard = ({
       className={`
         relative rounded-2xl overflow-hidden transition-all duration-300
         ${cardVariants[variant]}
-        ${glow && isHovered ? "shadow-2xl shadow-blue-500/25" : ""}
+        ${glow && isHovered ? "shadow-2xl shadow-teal-500/20" : ""}
         ${className}
       `}
       {...props}
     >
       {/* Animated Background Gradient */}
       <motion.div
-        className="absolute inset-0 bg-gradient-to-r from-blue-600/10 via-purple-600/10 to-pink-600/10"
+        className="absolute inset-0 bg-gradient-to-r from-teal-400/10 via-amber-300/10 to-rose-400/10"
         initial={{ opacity: 0 }}
         animate={{
           opacity: isHovered ? 1 : 0,
@@ -107,8 +108,8 @@ const AnimatedCard = ({
           className="absolute inset-0 rounded-2xl"
           animate={{
             boxShadow: isHovered
-              ? "0 0 30px rgba(59, 130, 246, 0.3)"
-              : "0 0 0px rgba(59, 130, 246, 0)",
+              ? "0 0 30px rgba(24, 213, 189, 0.25)"
+              : "0 0 0px rgba(24, 213, 189, 0)",
           }}
           transition={{ duration: 0.3 }}
         />

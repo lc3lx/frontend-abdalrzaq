@@ -181,7 +181,7 @@ const Dashboard = () => {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
-        className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-3xl p-8 text-glow-white relative overflow-hidden"
+        className="premium-panel rounded-2xl p-8 text-glow-white relative overflow-hidden"
       >
         <motion.div
           animate={{
@@ -193,7 +193,7 @@ const Dashboard = () => {
             repeat: Infinity,
             ease: "linear",
           }}
-          className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16"
+          className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-teal-300/20 to-amber-300/10 rounded-full -translate-y-16 translate-x-16"
         />
 
         <div className="relative z-10">
@@ -246,7 +246,7 @@ const Dashboard = () => {
                 </motion.p>
               </div>
               <div
-                className={`w-12 h-12 rounded-xl ${stat.bg} flex items-center justify-center`}
+                className={`w-12 h-12 rounded-xl ${stat.bg} flex items-center justify-center shadow-lg`}
               >
                 <stat.icon className={`w-6 h-6 ${stat.color}`} />
               </div>
@@ -270,7 +270,7 @@ const Dashboard = () => {
           النشاط الأخير (آخر 7 أيام)
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="flex items-center justify-between p-4 bg-blue-50 rounded-xl">
+          <div className="flex items-center justify-between p-4 premium-card rounded-xl">
             <div>
               <p className="text-sm text-white/70">منشورات جديدة</p>
               <p className="text-2xl font-bold text-blue-600">
@@ -279,7 +279,7 @@ const Dashboard = () => {
             </div>
             <FaPlus className="w-8 h-8 text-blue-600" />
           </div>
-          <div className="flex items-center justify-between p-4 bg-green-50 rounded-xl">
+          <div className="flex items-center justify-between p-4 premium-card rounded-xl">
             <div>
               <p className="text-sm text-white/70">رسائل جديدة</p>
               <p className="text-2xl font-bold text-green-600">
@@ -351,18 +351,18 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
+    <div className="app-bg min-h-screen relative overflow-hidden">
       <Navbar />
 
       {/* Animated Background */}
       <motion.div
-        className="absolute inset-0"
+        className="absolute inset-0 opacity-30"
         animate={{
           background: [
-            "radial-gradient(600px circle at 20% 30%, #3b82f6 0%, transparent 50%)",
-            "radial-gradient(600px circle at 80% 70%, #8b5cf6 0%, transparent 50%)",
-            "radial-gradient(600px circle at 40% 80%, #ec4899 0%, transparent 50%)",
-            "radial-gradient(600px circle at 20% 30%, #3b82f6 0%, transparent 50%)",
+            "radial-gradient(600px circle at 20% 30%, #18d5bd 0%, transparent 50%)",
+            "radial-gradient(600px circle at 80% 70%, #f5b84b 0%, transparent 50%)",
+            "radial-gradient(600px circle at 40% 80%, #f05776 0%, transparent 50%)",
+            "radial-gradient(600px circle at 20% 30%, #18d5bd 0%, transparent 50%)",
           ],
         }}
         transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
@@ -373,7 +373,7 @@ const Dashboard = () => {
         {[...Array(20)].map((_, i) => (
           <motion.div
             key={i}
-            className="absolute w-2 h-2 bg-blue-400/20 rounded-full"
+            className="absolute w-2 h-2 bg-teal-300/15 rounded-full"
             animate={{
               x: [
                 Math.random() * windowSize.width,
@@ -400,7 +400,7 @@ const Dashboard = () => {
         {[...Array(5)].map((_, i) => (
           <motion.div
             key={i}
-            className="absolute w-32 h-32 bg-blue-500/5 rounded-full"
+            className="absolute w-32 h-32 bg-amber-300/5 rounded-full"
             animate={{
               x: [
                 Math.random() * window.innerWidth,
@@ -430,7 +430,7 @@ const Dashboard = () => {
         <motion.div
           variants={sidebarVariants}
           animate={sidebarCollapsed ? "collapsed" : "expanded"}
-          className="bg-white/10 backdrop-blur-xl border-r border-white/20 shadow-2xl relative z-10"
+          className="relative z-10 border-r border-white/10 bg-[#07110f]/72 shadow-2xl backdrop-blur-2xl"
         >
           <div className="p-6">
             {/* Logo */}
@@ -440,7 +440,7 @@ const Dashboard = () => {
                 justifyContent: sidebarCollapsed ? "center" : "flex-start",
               }}
             >
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center">
+              <div className="w-10 h-10 bg-gradient-to-br from-teal-300 via-amber-300 to-rose-400 rounded-xl flex items-center justify-center shadow-glow">
                 <FaCrown className="w-5 h-5 text-glow-white" />
               </div>
               <AnimatePresence>
@@ -449,7 +449,7 @@ const Dashboard = () => {
                     initial={{ opacity: 0, width: 0 }}
                     animate={{ opacity: 1, width: "auto" }}
                     exit={{ opacity: 0, width: 0 }}
-                    className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"
+                    className="text-xl font-black bg-gradient-to-r from-teal-300 via-amber-200 to-rose-300 bg-clip-text text-transparent"
                   >
                     Smart Social
                   </motion.h1>
@@ -470,10 +470,10 @@ const Dashboard = () => {
                     w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300
                     ${
                       activeSection === section.id
-                        ? "bg-gradient-to-r " +
+                            ? "bg-gradient-to-r " +
                           section.color +
                           " text-white shadow-lg"
-                        : "text-white/80 hover:bg-white/10 hover:text-white"
+                        : "text-white/74 hover:bg-white/10 hover:text-white"
                     }
                   `}
                 >
@@ -517,7 +517,7 @@ const Dashboard = () => {
           <motion.header
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white/10 backdrop-blur-xl border-b border-white/20 px-8 py-4"
+            className="border-b border-white/10 bg-[#07110f]/55 px-8 py-4 backdrop-blur-2xl"
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
@@ -534,7 +534,7 @@ const Dashboard = () => {
                   <input
                     type="text"
                     placeholder="بحث..."
-                    className="pl-10 pr-4 py-2 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/50 focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all backdrop-blur-sm"
+                    className="pl-10 pr-4 py-2 bg-white/[0.08] border border-white/10 rounded-xl text-white placeholder-white/45 focus:ring-2 focus:ring-teal-300/40 focus:border-transparent transition-all backdrop-blur-sm"
                   />
                 </div>
 
@@ -551,7 +551,7 @@ const Dashboard = () => {
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="relative p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-xl transition-colors"
+                  className="relative p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-colors"
                 >
                   <FaBell className="w-5 h-5" />
                   <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
@@ -563,13 +563,13 @@ const Dashboard = () => {
                     <p className="text-sm font-medium text-white">
                       {user.username}
                     </p>
-                    <p className="text-xs text-gray-500">{user.email}</p>
+                    <p className="text-xs text-white/50">{user.email}</p>
                   </div>
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={logout}
-                    className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors"
+                    className="p-2 text-white/70 hover:text-rose-300 hover:bg-rose-500/10 rounded-xl transition-colors"
                   >
                     <FaSignOutAlt className="w-5 h-5" />
                   </motion.button>

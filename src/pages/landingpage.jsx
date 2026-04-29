@@ -37,17 +37,17 @@ const Landing = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
+    <div className="app-bg min-h-screen relative overflow-hidden">
       <Navbar />
       {/* Animated Background */}
       <motion.div
-        className="absolute inset-0"
+        className="absolute inset-0 opacity-30"
         animate={{
           background: [
-            "radial-gradient(600px circle at 20% 30%, #3b82f6 0%, transparent 50%)",
-            "radial-gradient(600px circle at 80% 70%, #8b5cf6 0%, transparent 50%)",
-            "radial-gradient(600px circle at 40% 80%, #ec4899 0%, transparent 50%)",
-            "radial-gradient(600px circle at 20% 30%, #3b82f6 0%, transparent 50%)",
+            "radial-gradient(600px circle at 20% 30%, #18d5bd 0%, transparent 50%)",
+            "radial-gradient(600px circle at 80% 70%, #f5b84b 0%, transparent 50%)",
+            "radial-gradient(600px circle at 40% 80%, #f05776 0%, transparent 50%)",
+            "radial-gradient(600px circle at 20% 30%, #18d5bd 0%, transparent 50%)",
           ],
         }}
         transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
@@ -58,7 +58,7 @@ const Landing = () => {
         {[...Array(20)].map((_, i) => (
           <motion.div
             key={i}
-            className="absolute w-2 h-2 bg-blue-400/20 rounded-full"
+            className="absolute w-2 h-2 bg-teal-300/15 rounded-full"
             animate={{
               x: [
                 Math.random() * windowSize.width,
@@ -95,7 +95,7 @@ const Landing = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-white/10 backdrop-blur-lg rounded-full border border-white/20 text-white"
+              className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.08] px-6 py-3 text-white backdrop-blur-2xl"
             >
               <FaRocket className="text-yellow-400" />
               <span className="text-sm font-medium text-glow-white">
@@ -106,7 +106,7 @@ const Landing = () => {
             {/* Main Heading */}
             <div className="space-y-4">
               <motion.h1
-                className="text-6xl lg:text-8xl font-black text-visible leading-tight"
+                className="text-6xl lg:text-8xl font-black text-visible leading-tight tracking-normal"
                 initial={{ opacity: 0, y: 50 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 1, delay: 0.6 }}
@@ -116,7 +116,7 @@ const Landing = () => {
                     backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
                   }}
                   transition={{ duration: 3, repeat: Infinity }}
-                  className="bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent"
+                  className="bg-gradient-to-r from-teal-300 via-amber-200 to-rose-300 bg-clip-text text-transparent"
                   style={{ backgroundSize: "300% 300%" }}
                 >
                   Smart
@@ -139,7 +139,7 @@ const Landing = () => {
                 transition={{ duration: 1, delay: 1 }}
               >
                 أدر جميع حساباتك على مواقع التواصل الاجتماعي من مكان واحد مع
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 font-bold">
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-300 to-amber-200 font-bold">
                   {" "}
                   ذكاء اصطناعي متقدم
                 </span>
@@ -159,7 +159,7 @@ const Landing = () => {
               >
                 <Link
                   to="/register"
-                  className="group relative px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl text-white font-bold text-lg shadow-2xl overflow-hidden inline-flex items-center gap-3"
+                  className="premium-button group relative overflow-hidden text-lg"
                 >
                   ابدأ مجاناً الآن
                   <FaArrowRight />
@@ -167,11 +167,11 @@ const Landing = () => {
               </motion.div>
 
               <motion.button
-                className="group flex items-center gap-3 px-8 py-4 bg-white/10 backdrop-blur-lg rounded-2xl text-white font-bold text-lg border border-white/20 hover:bg-white/20 transition-all"
+                className="premium-muted-button group text-lg"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                <div className="w-12 h-12 bg-gradient-to-br from-teal-300 to-amber-300 rounded-full flex items-center justify-center text-slate-950">
                   <FaPlay className="text-sm mr-1" />
                 </div>
                 شاهد العرض التوضيحي
@@ -186,7 +186,7 @@ const Landing = () => {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1.2, delay: 0.8 }}
           >
-            <div className="relative bg-white/10 backdrop-blur-xl rounded-3xl p-8 border border-white/20 shadow-2xl">
+            <div className="relative premium-panel rounded-2xl p-8">
               {/* Dashboard Header */}
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
@@ -223,7 +223,7 @@ const Landing = () => {
                 ].map((stat, index) => (
                   <motion.div
                     key={stat.label}
-                    className={`bg-gradient-to-r ${stat.color} p-4 rounded-xl`}
+                  className={`bg-gradient-to-r ${stat.color} p-4 rounded-xl shadow-lg`}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 1.2 + index * 0.1 }}
@@ -262,7 +262,7 @@ const Landing = () => {
       </motion.div>
 
       {/* How It Works Section */}
-      <section className="relative z-10 py-32 bg-gradient-to-b from-slate-900 to-slate-800">
+      <section className="relative z-10 py-32 bg-black/10">
         <div className="container mx-auto px-6">
           <motion.div
             initial={{ opacity: 0, y: 50 }}
@@ -288,7 +288,7 @@ const Landing = () => {
                 whileInView={{ opacity: 1, x: 0 }}
                 transition={{ duration: 1, delay: 0.2 }}
                 viewport={{ once: true }}
-                className="bg-white/10 backdrop-blur-xl rounded-3xl p-8 border border-white/20"
+                className="premium-panel rounded-2xl p-8"
               >
                 <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
                   <FaBolt className="text-yellow-400" />
@@ -311,7 +311,7 @@ const Landing = () => {
                   <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-4 rounded-xl font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-300"
+                    className="premium-button w-full"
                   >
                     <FaRocket className="inline mr-2" />
                     انشر على جميع المنصات
@@ -443,7 +443,7 @@ const Landing = () => {
       </section>
 
       {/* Features Section */}
-      <section className="relative z-10 py-32 bg-gradient-to-b from-slate-800 to-slate-900">
+      <section className="relative z-10 py-32 bg-white/[0.02]">
         <div className="container mx-auto px-6">
           <motion.div
             initial={{ opacity: 0, y: 50 }}
@@ -507,7 +507,7 @@ const Landing = () => {
                 transition={{ duration: 0.8, delay: index * 0.1 }}
                 viewport={{ once: true }}
                 whileHover={{ y: -10, scale: 1.02 }}
-                className="bg-white/10 backdrop-blur-xl rounded-3xl p-8 border border-white/20 hover:border-white/30 transition-all duration-300 group"
+                className="premium-card rounded-2xl p-8 group"
               >
                 <div
                   className={`w-16 h-16 bg-gradient-to-r ${feature.color} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}
@@ -527,7 +527,7 @@ const Landing = () => {
       </section>
 
       {/* Stats Section */}
-      <section className="relative z-10 py-32 bg-gradient-to-b from-slate-900 to-slate-800">
+      <section className="relative z-10 py-32 bg-black/10">
         <div className="container mx-auto px-6">
           <motion.div
             initial={{ opacity: 0, y: 50 }}
@@ -573,7 +573,7 @@ const Landing = () => {
                 whileInView={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.8, delay: index * 0.2 }}
                 viewport={{ once: true }}
-                className={`bg-gradient-to-br ${stat.color} p-8 rounded-3xl text-center shadow-2xl`}
+                className={`bg-gradient-to-br ${stat.color} p-8 rounded-2xl text-center shadow-2xl`}
               >
                 <motion.div
                   initial={{ scale: 0 }}
@@ -596,7 +596,7 @@ const Landing = () => {
       </section>
 
       {/* Testimonials Section */}
-      <section className="relative z-10 py-32 bg-gradient-to-b from-slate-800 to-slate-900">
+      <section className="relative z-10 py-32 bg-white/[0.02]">
         <div className="container mx-auto px-6">
           <motion.div
             initial={{ opacity: 0, y: 50 }}
@@ -647,7 +647,7 @@ const Landing = () => {
                 transition={{ duration: 0.8, delay: index * 0.2 }}
                 viewport={{ once: true }}
                 whileHover={{ y: -10, scale: 1.02 }}
-                className="bg-white/10 backdrop-blur-xl rounded-3xl p-8 border border-white/20 hover:border-white/30 transition-all duration-300"
+                className="premium-card rounded-2xl p-8"
               >
                 <div className="flex items-center gap-1 mb-4">
                   {[...Array(testimonial.rating)].map((_, i) => (
@@ -681,7 +681,7 @@ const Landing = () => {
       </section>
 
       {/* Final CTA Section */}
-      <section className="relative z-10 py-32 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600">
+      <section className="relative z-10 py-32 bg-gradient-to-r from-teal-500 via-amber-400 to-rose-500">
         <div className="container mx-auto px-6 text-center">
           <motion.div
             initial={{ opacity: 0, y: 50 }}
@@ -705,7 +705,7 @@ const Landing = () => {
             >
               <Link
                 to="/register"
-                className="bg-white text-purple-600 px-12 py-6 rounded-3xl font-bold text-2xl shadow-2xl hover:bg-gray-50 transition-all duration-300 inline-flex items-center gap-4"
+                className="inline-flex items-center gap-4 rounded-2xl bg-slate-950 px-12 py-6 text-2xl font-bold text-white shadow-2xl transition-all duration-300 hover:bg-slate-900"
               >
                 <FaRocket className="text-2xl" />
                 سجل مجاناً الآن

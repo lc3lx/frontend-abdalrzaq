@@ -135,14 +135,14 @@ const AdminPackages = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
+      <div className="app-bg min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+    <div className="app-bg min-h-screen">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -150,22 +150,22 @@ const AdminPackages = () => {
             <div className="text-center lg:text-right">
               <button
                 onClick={() => navigate("/admin/dashboard")}
-                className="group flex items-center gap-2 text-blue-600 hover:text-blue-800 mb-4 transition-colors duration-300"
+                className="group flex items-center gap-2 text-teal-300 hover:text-teal-200 mb-4 transition-colors duration-300"
               >
                 <FaArrowLeft className="group-hover:scale-110 transition-transform" />
                 العودة للوحة التحكم
               </button>
-              <h1 className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-3">
+              <h1 className="text-4xl lg:text-5xl font-black bg-gradient-to-r from-teal-300 via-amber-200 to-rose-300 bg-clip-text text-transparent mb-3 tracking-normal">
                 إدارة الباقات
               </h1>
-              <p className="text-gray-600 text-lg">
+              <p className="text-white/70 text-lg">
                 إنشاء وتعديل باقات الخدمات المتاحة للمستخدمين
               </p>
             </div>
             <div className="flex justify-center lg:justify-end">
               <button
                 onClick={() => setShowCreateModal(true)}
-                className="group flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+                className="premium-button group"
               >
                 <FaPlus className="text-lg group-hover:scale-110 transition-transform" />
                 <span className="font-semibold">إضافة باقة جديدة</span>

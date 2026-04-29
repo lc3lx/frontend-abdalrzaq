@@ -153,18 +153,18 @@ const WalletPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
+    <div className="app-bg min-h-screen relative overflow-hidden">
       <Navbar />
 
       {/* Animated Background */}
       <motion.div
-        className="absolute inset-0"
+        className="absolute inset-0 opacity-30"
         animate={{
           background: [
-            "radial-gradient(600px circle at 20% 30%, #3b82f6 0%, transparent 50%)",
-            "radial-gradient(600px circle at 80% 70%, #8b5cf6 0%, transparent 50%)",
-            "radial-gradient(600px circle at 40% 80%, #ec4899 0%, transparent 50%)",
-            "radial-gradient(600px circle at 20% 30%, #3b82f6 0%, transparent 50%)",
+            "radial-gradient(600px circle at 20% 30%, #18d5bd 0%, transparent 50%)",
+            "radial-gradient(600px circle at 80% 70%, #f5b84b 0%, transparent 50%)",
+            "radial-gradient(600px circle at 40% 80%, #f05776 0%, transparent 50%)",
+            "radial-gradient(600px circle at 20% 30%, #18d5bd 0%, transparent 50%)",
           ],
         }}
         transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
@@ -175,7 +175,7 @@ const WalletPage = () => {
         {[...Array(20)].map((_, i) => (
           <motion.div
             key={i}
-            className="absolute w-2 h-2 bg-blue-400/20 rounded-full"
+            className="absolute w-2 h-2 bg-teal-300/15 rounded-full"
             animate={{
               x: [
                 Math.random() * windowSize.width,
@@ -211,7 +211,7 @@ const WalletPage = () => {
             transition={{ delay: 0.4 }}
             className="mb-12 text-center"
           >
-            <div className="w-20 h-20 bg-gradient-to-r from-green-500 to-blue-500 rounded-3xl flex items-center justify-center mx-auto mb-6">
+            <div className="w-20 h-20 bg-gradient-to-br from-teal-300 via-amber-300 to-rose-400 rounded-2xl flex items-center justify-center mx-auto mb-6 text-slate-950 shadow-glow">
               <FaWallet className="text-3xl text-white" />
             </div>
             <h1 className="text-5xl lg:text-6xl font-black text-white mb-4">
@@ -227,7 +227,7 @@ const WalletPage = () => {
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6 }}
-            className="bg-white/10 backdrop-blur-xl rounded-3xl p-8 lg:p-12 border border-white/20 shadow-2xl mb-8"
+            className="premium-panel rounded-2xl p-8 lg:p-12 mb-8"
           >
             <div className="text-center mb-8">
               <h2 className="text-3xl font-bold text-white mb-4">
@@ -259,7 +259,7 @@ const WalletPage = () => {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setShowRecharge(true)}
-                className="flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-bold text-lg shadow-2xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300"
+                className="premium-button text-lg"
               >
                 <FaWallet className="text-xl" />
                 Recharge Wallet
@@ -293,7 +293,7 @@ const WalletPage = () => {
                       onClick={() => setActiveTab(tab.id)}
                       className={`flex items-center gap-3 py-3 px-6 rounded-lg font-medium text-sm transition-all duration-300 ${
                         activeTab === tab.id
-                          ? "bg-white text-purple-600 shadow-lg"
+                          ? "bg-white text-slate-950 shadow-lg"
                           : "text-white/80 hover:text-white hover:bg-white/10"
                       }`}
                     >
@@ -321,7 +321,7 @@ const WalletPage = () => {
                   <WalletStats wallet={wallet} />
 
                   {/* Recent Cards */}
-                  <div className="bg-white/10 backdrop-blur-xl rounded-3xl border border-white/20 shadow-2xl p-8">
+                  <div className="premium-panel rounded-2xl p-8">
                     <div className="flex justify-between items-center mb-8">
                       <div>
                         <h3 className="text-2xl font-bold text-white mb-2">
@@ -335,7 +335,7 @@ const WalletPage = () => {
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         onClick={() => setShowAddCard(true)}
-                        className="flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-bold hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-2xl"
+                        className="premium-button"
                       >
                         <FaPlus className="text-lg" />
                         <span>Add Card</span>
@@ -355,7 +355,7 @@ const WalletPage = () => {
                         </p>
                         <button
                           onClick={() => setShowAddCard(true)}
-                          className="px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-xl hover:from-blue-600 hover:to-purple-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                          className="premium-button"
                         >
                           إضافة بطاقتي الأولى
                         </button>
@@ -390,7 +390,7 @@ const WalletPage = () => {
 
               {activeTab === "cards" && (
                 <div className="space-y-8">
-                  <div className="bg-white/10 backdrop-blur-xl rounded-3xl border border-white/20 shadow-2xl p-8">
+                  <div className="premium-panel rounded-2xl p-8">
                     <div className="flex justify-between items-center mb-8">
                       <div>
                         <h2 className="text-3xl font-bold text-white mb-2">
@@ -404,7 +404,7 @@ const WalletPage = () => {
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         onClick={() => setShowAddCard(true)}
-                        className="flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-bold hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-2xl"
+                        className="premium-button"
                       >
                         <FaPlus className="text-lg" />
                         <span>إضافة بطاقة جديدة</span>
@@ -426,7 +426,7 @@ const WalletPage = () => {
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
                           onClick={() => setShowAddCard(true)}
-                          className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-bold hover:from-blue-700 hover:to-purple-700 transition-all duration-300"
+                          className="premium-button px-6 py-2"
                         >
                           Add Your First Card
                         </motion.button>
@@ -456,7 +456,7 @@ const WalletPage = () => {
 
               {activeTab === "transactions" && (
                 <div className="space-y-8">
-                  <div className="bg-white/10 backdrop-blur-xl rounded-3xl border border-white/20 shadow-2xl p-8">
+                  <div className="premium-panel rounded-2xl p-8">
                     <div className="mb-8">
                       <h2 className="text-3xl font-bold text-white mb-2">
                         سجل المعاملات
@@ -484,7 +484,7 @@ const WalletPage = () => {
                   <h2 className="text-2xl font-bold text-white">
                     Wallet Settings
                   </h2>
-                  <div className="bg-white/10 backdrop-blur-xl rounded-3xl border border-white/20 shadow-2xl p-6">
+                  <div className="premium-panel rounded-2xl p-6">
                     <h3 className="text-lg font-semibold text-white mb-4">
                       Coming Soon
                     </h3>

@@ -169,7 +169,7 @@ const InboxPage = () => {
         <button
           onClick={handleSync}
           disabled={isLoading}
-          className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-xl disabled:opacity-50 flex items-center gap-2 font-semibold"
+          className="premium-button disabled:opacity-50"
         >
           <FaSync className={isLoading ? "animate-spin" : ""} />
           Sync Messages
@@ -239,7 +239,7 @@ const InboxPage = () => {
           <select
             value={filters.platform}
             onChange={(e) => handleFilterChange("platform", e.target.value)}
-            className="px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-400 transition-all appearance-none"
+            className="px-4 py-3 bg-white/[0.08] border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-teal-300/40 transition-all appearance-none"
           >
             <option value="" className="bg-slate-800">All Platforms</option>
             {platforms.map((platform) => (
@@ -252,7 +252,7 @@ const InboxPage = () => {
           <select
             value={filters.isRead}
             onChange={(e) => handleFilterChange("isRead", e.target.value)}
-            className="px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-400 transition-all appearance-none"
+            className="px-4 py-3 bg-white/[0.08] border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-teal-300/40 transition-all appearance-none"
           >
             <option value="" className="bg-slate-800">All Messages</option>
             <option value="false" className="bg-slate-800">Unread Only</option>
@@ -266,7 +266,7 @@ const InboxPage = () => {
               placeholder="Search messages..."
               value={filters.search}
               onChange={(e) => handleSearch(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-purple-400 transition-all"
+              className="w-full pl-12 pr-4 py-3 bg-white/[0.08] border border-white/10 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-teal-300/40 transition-all"
             />
           </div>
         </div>
@@ -326,7 +326,7 @@ const InboxPage = () => {
                       type="checkbox"
                       checked={selectedMessages.includes(message._id)}
                       onChange={() => handleSelectMessage(message._id)}
-                      className="mt-1.5 h-5 w-5 text-purple-600 border-white/30 rounded bg-white/10 focus:ring-purple-500"
+                      className="mt-1.5 h-5 w-5 text-teal-300 border-white/30 rounded bg-white/10 focus:ring-teal-300"
                     />
 
                     <div className="flex-1">
@@ -382,7 +382,7 @@ const InboxPage = () => {
                       {!message.isRead && (
                         <button
                           onClick={() => handleMarkAsRead(message._id)}
-                          className="text-blue-400 hover:text-blue-300 bg-blue-400/10 hover:bg-blue-400/20 p-3 rounded-xl transition-all"
+                          className="text-teal-300 hover:text-teal-200 bg-teal-400/10 hover:bg-teal-400/20 p-3 rounded-xl transition-all"
                           title="Mark as read"
                         >
                           <FaEye />

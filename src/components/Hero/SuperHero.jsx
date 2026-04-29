@@ -131,7 +131,7 @@ const SuperHero = () => {
   return (
     <section 
       ref={heroRef}
-      className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900"
+      className="app-bg relative min-h-screen overflow-hidden"
     >
       {/* Particle Field */}
       <ParticleField />
@@ -193,7 +193,7 @@ const SuperHero = () => {
                     backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
                   }}
                   transition={{ duration: 3, repeat: Infinity }}
-                  className="bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent bg-300% animate-gradient"
+                  className="bg-gradient-to-r from-teal-300 via-amber-200 to-rose-300 bg-clip-text text-transparent bg-size-300 animate-gradient"
                 >
                   Smart
                 </motion.span>
@@ -270,7 +270,7 @@ const SuperHero = () => {
               >
                 <Link
                   to="/register"
-                  className="group relative px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl text-white font-bold text-lg shadow-2xl overflow-hidden"
+                  className="premium-button group relative overflow-hidden text-lg"
                 >
                   <motion.div
                     className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 opacity-0 group-hover:opacity-100"
@@ -316,7 +316,7 @@ const SuperHero = () => {
           >
             {/* Main Dashboard Mockup */}
             <motion.div
-              className="relative bg-white/10 backdrop-blur-xl rounded-3xl p-8 border border-white/20 shadow-2xl"
+              className="relative premium-panel rounded-2xl p-8"
               whileHover={{ scale: 1.02 }}
               transition={{ type: "spring", stiffness: 300 }}
             >
@@ -442,7 +442,7 @@ const SuperHero = () => {
             transition={{ type: "spring", stiffness: 300 }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="w-full h-full bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-white">
+            <div className="w-full h-full bg-gradient-to-br from-teal-400 via-amber-300 to-rose-400 flex items-center justify-center text-slate-950">
               <div className="text-center">
                 <FaPlay className="text-6xl mb-4 mx-auto" />
                 <p className="text-xl">العرض التوضيحي قريباً</p>

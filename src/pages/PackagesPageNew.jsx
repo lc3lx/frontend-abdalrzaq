@@ -110,17 +110,17 @@ const PackagesPageNew = () => {
   const getPackageGradient = (index, packageName) => {
     const name = packageName.toLowerCase();
     if (name.includes("مجاني") || name.includes("basic"))
-      return "from-blue-500 via-blue-600 to-blue-700";
+      return "from-teal-400 via-cyan-500 to-teal-700";
     if (name.includes("متقدم") || name.includes("pro"))
-      return "from-purple-500 via-purple-600 to-purple-700";
+      return "from-amber-300 via-orange-400 to-rose-500";
     if (name.includes("مميز") || name.includes("premium"))
-      return "from-yellow-400 via-yellow-500 to-yellow-600";
+      return "from-amber-200 via-yellow-300 to-orange-400";
 
     const gradients = [
-      "from-blue-500 via-blue-600 to-blue-700",
-      "from-purple-500 via-purple-600 to-purple-700",
-      "from-pink-500 via-pink-600 to-pink-700",
-      "from-green-500 via-green-600 to-green-700",
+      "from-teal-400 via-cyan-500 to-teal-700",
+      "from-amber-300 via-orange-400 to-rose-500",
+      "from-rose-400 via-pink-500 to-fuchsia-600",
+      "from-emerald-400 via-teal-500 to-cyan-600",
     ];
     return gradients[index % gradients.length];
   };
@@ -144,7 +144,7 @@ const PackagesPageNew = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+      <div className="app-bg min-h-screen flex items-center justify-center">
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
@@ -155,20 +155,20 @@ const PackagesPageNew = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
+    <div className="app-bg min-h-screen relative overflow-hidden">
       {/* Animated Background */}
       <div className="absolute inset-0">
         <motion.div
           animate={{
             background: [
-              "radial-gradient(600px circle at 20% 30%, #3b82f6 0%, transparent 50%)",
-              "radial-gradient(600px circle at 80% 70%, #8b5cf6 0%, transparent 50%)",
-              "radial-gradient(600px circle at 40% 80%, #ec4899 0%, transparent 50%)",
-              "radial-gradient(600px circle at 20% 30%, #3b82f6 0%, transparent 50%)",
+              "radial-gradient(600px circle at 20% 30%, #18d5bd 0%, transparent 50%)",
+              "radial-gradient(600px circle at 80% 70%, #f5b84b 0%, transparent 50%)",
+              "radial-gradient(600px circle at 40% 80%, #f05776 0%, transparent 50%)",
+              "radial-gradient(600px circle at 20% 30%, #18d5bd 0%, transparent 50%)",
             ],
           }}
           transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          className="absolute inset-0"
+          className="absolute inset-0 opacity-30"
         />
       </div>
 
@@ -177,7 +177,7 @@ const PackagesPageNew = () => {
         {[...Array(30)].map((_, i) => (
           <motion.div
             key={i}
-            className="absolute w-2 h-2 bg-blue-400/20 rounded-full"
+            className="absolute w-2 h-2 bg-teal-300/15 rounded-full"
             animate={{
               x: [
                 Math.random() * window.innerWidth,
@@ -211,18 +211,18 @@ const PackagesPageNew = () => {
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-            className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl mb-8"
+            className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-teal-300 via-amber-300 to-rose-400 rounded-2xl mb-8 shadow-glow"
           >
             <FaCrown className="w-10 h-10 text-glow-white" />
           </motion.div>
 
-          <h1 className="text-6xl lg:text-8xl font-black text-glow-white mb-6">
+          <h1 className="text-6xl lg:text-8xl font-black text-glow-white mb-6 tracking-normal">
             <motion.span
               animate={{
                 backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
               }}
               transition={{ duration: 3, repeat: Infinity }}
-              className="bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent bg-300%"
+              className="bg-gradient-to-r from-teal-300 via-amber-200 to-rose-300 bg-clip-text text-transparent bg-size-300"
             >
               اختر باقتك
             </motion.span>

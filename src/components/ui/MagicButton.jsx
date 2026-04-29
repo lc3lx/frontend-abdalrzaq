@@ -20,18 +20,18 @@ const MagicButton = ({
 
   const variants = {
     primary:
-      "bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white shadow-2xl",
+      "bg-gradient-to-r from-teal-400 via-amber-300 to-rose-400 text-slate-950 shadow-2xl shadow-teal-500/15",
     secondary:
       "bg-white/10 backdrop-blur-xl text-white border border-white/20 shadow-xl",
     success:
-      "bg-gradient-to-r from-green-500 via-emerald-600 to-teal-600 text-white shadow-2xl",
+      "bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 text-slate-950 shadow-2xl",
     warning:
-      "bg-gradient-to-r from-yellow-500 via-orange-500 to-red-500 text-white shadow-2xl",
+      "bg-gradient-to-r from-amber-300 via-orange-400 to-rose-400 text-slate-950 shadow-2xl",
     danger:
       "bg-gradient-to-r from-red-600 via-pink-600 to-rose-600 text-white shadow-2xl",
     ghost: "bg-transparent hover:bg-white/10 text-white border border-white/30",
     magic:
-      "bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white shadow-2xl relative overflow-hidden",
+      "bg-gradient-to-r from-teal-400 via-amber-300 to-rose-400 text-slate-950 shadow-2xl relative overflow-hidden",
   };
 
   const sizes = {
@@ -76,7 +76,8 @@ const MagicButton = ({
   const buttonVariants = {
     initial: { scale: 1 },
     hover: {
-      scale: 1.05,
+      scale: 1.025,
+      y: -1,
       boxShadow: "0 20px 40px rgba(0,0,0,0.3)",
       transition: { duration: 0.2, ease: "easeOut" },
     },
@@ -105,8 +106,8 @@ const MagicButton = ({
       onClick={handleClick}
       className={`
         relative inline-flex items-center justify-center gap-3
-        rounded-2xl font-bold transition-all duration-300 
-        focus:outline-none focus:ring-4 focus:ring-blue-500/20
+        rounded-xl font-bold transition-all duration-300 
+        focus:outline-none focus:ring-4 focus:ring-teal-300/25
         overflow-hidden group
         ${variants[variant]}
         ${sizes[size]}
@@ -118,7 +119,7 @@ const MagicButton = ({
       {/* Animated Background for Magic variant */}
       {variant === "magic" && (
         <motion.div
-          className="absolute inset-0 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600"
+          className="absolute inset-0 bg-gradient-to-r from-teal-400 via-amber-300 to-rose-400"
           animate={{
             backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
           }}
@@ -220,14 +221,14 @@ const MagicButton = ({
 
       {/* Glow Effect */}
       <motion.div
-        className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100"
+        className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100"
         animate={{
           boxShadow: [
-            "0 0 0px rgba(59, 130, 246, 0)",
-            "0 0 20px rgba(59, 130, 246, 0.5)",
-            "0 0 40px rgba(59, 130, 246, 0.3)",
-            "0 0 20px rgba(59, 130, 246, 0.5)",
-            "0 0 0px rgba(59, 130, 246, 0)",
+            "0 0 0px rgba(24, 213, 189, 0)",
+            "0 0 20px rgba(24, 213, 189, 0.45)",
+            "0 0 40px rgba(245, 184, 75, 0.25)",
+            "0 0 20px rgba(24, 213, 189, 0.45)",
+            "0 0 0px rgba(24, 213, 189, 0)",
           ],
         }}
         transition={{ duration: 2, repeat: Infinity }}

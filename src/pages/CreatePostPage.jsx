@@ -12,6 +12,7 @@ import {
   FaLinkedin,
   FaTiktok,
   FaYoutube,
+  FaWhatsapp,
 } from "react-icons/fa";
 
 const CreatePostPage = () => {
@@ -27,6 +28,7 @@ const CreatePostPage = () => {
   const [imageUrl, setImageUrl] = useState(null);
   const [imageFile, setImageFile] = useState(null);
   const [selectedPlatforms, setSelectedPlatforms] = useState([]);
+  const [whatsappTo, setWhatsappTo] = useState("");
   const [windowSize, setWindowSize] = useState({ width: 1920, height: 1080 });
 
   useEffect(() => {
@@ -78,6 +80,12 @@ const CreatePostPage = () => {
       icon: FaYoutube,
       color: "text-red-600",
       serviceType: "youtube",
+    },
+    {
+      name: "WhatsApp",
+      icon: FaWhatsapp,
+      color: "text-green-500",
+      serviceType: "whatsapp",
     },
   ];
 
@@ -132,11 +140,17 @@ const CreatePostPage = () => {
       return;
     }
 
+    if (selectedPlatforms.includes("WhatsApp") && !whatsappTo.trim()) {
+      alert("Please enter the WhatsApp recipient phone number.");
+      return;
+    }
+
     try {
       const postData = {
         content: postContent,
         platforms: selectedPlatforms,
         imageUrl,
+        whatsappTo: whatsappTo.trim() || undefined,
       };
 
       const result = await postToPlatforms(postData);
@@ -160,6 +174,7 @@ const CreatePostPage = () => {
       // Reset form
       setPostContent("");
       setImageUrl(null);
+      setWhatsappTo("");
       setSelectedPlatforms([]);
     } catch (error) {
       const msg = error.response?.data?.message || error.response?.data?.error || error.message || "Unknown error";
@@ -182,7 +197,7 @@ const CreatePostPage = () => {
             transition={{ delay: 0.4 }}
             className="text-center mb-12"
           >
-            <div className="w-20 h-20 bg-gradient-to-r from-purple-500 to-pink-500 rounded-3xl flex items-center justify-center mx-auto mb-6">
+            <div className="w-20 h-20 bg-gradient-to-br from-teal-300 via-amber-300 to-rose-400 rounded-2xl flex items-center justify-center mx-auto mb-6 text-slate-950 shadow-glow">
               <FaPlus className="text-3xl text-white" />
             </div>
             <h1 className="text-5xl lg:text-6xl font-black text-white mb-4">
@@ -198,7 +213,7 @@ const CreatePostPage = () => {
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6 }}
-            className="bg-white/10 backdrop-blur-xl rounded-3xl p-8 lg:p-12 border border-white/20 shadow-2xl"
+            className="premium-panel rounded-2xl p-8 lg:p-12"
           >
             <form onSubmit={handleSubmit}>
               {/* Post Content */}
@@ -207,7 +222,7 @@ const CreatePostPage = () => {
                   Post Content
                 </label>
                 <textarea
-                  className="w-full p-6 bg-white/10 border border-white/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all duration-300 text-white placeholder-white/50 backdrop-blur-sm resize-none"
+                  className="premium-input min-h-40 resize-none p-6"
                   rows="5"
                   placeholder="Write your amazing post content here..."
                   value={postContent}
@@ -221,7 +236,7 @@ const CreatePostPage = () => {
                 <label className="block text-lg font-semibold text-white mb-4">
                   Media (Optional)
                 </label>
-                <div className="border-2 border-dashed border-white/30 rounded-xl p-8 text-center hover:border-purple-400 transition-all duration-300 bg-white/5">
+                <div className="rounded-xl border-2 border-dashed border-white/20 bg-white/[0.05] p-8 text-center transition-all duration-300 hover:border-teal-300/60">
                   <input
                     type="file"
                     accept="image/*,video/*"
@@ -311,15 +326,15 @@ const CreatePostPage = () => {
                         <label
                           className={`flex items-center p-4 rounded-xl border-2 cursor-pointer transition-all duration-300 ${
                             isSelected
-                              ? "border-purple-400 bg-purple-500/20 shadow-lg"
+                              ? "border-teal-300 bg-teal-400/15 shadow-lg"
                               : isConnected
-                              ? "border-white/30 hover:border-purple-400 hover:bg-white/10"
+                              ? "border-white/30 hover:border-teal-300/60 hover:bg-white/10"
                               : "border-white/20 bg-white/5 cursor-not-allowed opacity-50"
                           }`}
                         >
                           <input
                             type="checkbox"
-                            className="mr-4 h-6 w-6 text-purple-400 focus:ring-purple-400 border-white/30 rounded bg-transparent"
+                            className="mr-4 h-6 w-6 text-teal-300 focus:ring-teal-300 border-white/30 rounded bg-transparent"
                             checked={isSelected}
                             onChange={() => handlePlatformToggle(name)}
                             disabled={!isConnected || isPosting}
@@ -343,7 +358,7 @@ const CreatePostPage = () => {
                   <button
                     type="button"
                     onClick={handleSelectAll}
-                    className="text-sm text-blue-600 hover:text-blue-800 font-medium px-4 py-2 rounded-lg hover:bg-blue-50"
+                    className="rounded-lg px-4 py-2 text-sm font-bold text-teal-300 hover:bg-white/10"
                   >
                     {selectedPlatforms.length === connectedAccounts.length
                       ? "Unselect All"
@@ -352,13 +367,29 @@ const CreatePostPage = () => {
                 </div>
               </div>
 
+              {selectedPlatforms.includes("WhatsApp") && (
+                <div className="mb-8">
+                  <label className="block text-lg font-semibold text-white mb-4">
+                    WhatsApp Recipient
+                  </label>
+                  <input
+                    type="tel"
+                    value={whatsappTo}
+                    onChange={(e) => setWhatsappTo(e.target.value)}
+                    placeholder="مثال: 9639xxxxxxxx أو +9639xxxxxxxx"
+                    className="premium-input p-4"
+                    required={selectedPlatforms.includes("WhatsApp")}
+                  />
+                </div>
+              )}
+
               {/* Action Button */}
               <div className="flex gap-4 justify-center mt-12">
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   type="submit"
-                  className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-12 py-4 rounded-2xl hover:from-purple-700 hover:to-pink-700 transition-all duration-300 shadow-2xl text-xl font-bold flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="premium-button px-12 py-4 text-xl disabled:cursor-not-allowed disabled:opacity-50"
                   disabled={
                     !postContent || selectedPlatforms.length === 0 || isPosting
                   }

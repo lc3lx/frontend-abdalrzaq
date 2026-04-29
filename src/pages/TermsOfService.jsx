@@ -5,7 +5,7 @@ import Navbar from "../components/Navbar";
 
 const TermsOfService = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div className="app-bg min-h-screen">
       <Navbar />
       {/* Animated Background */}
       <motion.div
@@ -61,7 +61,7 @@ const TermsOfService = () => {
 
           {/* Content */}
           <motion.div
-            className="bg-white/10 backdrop-blur-xl rounded-3xl p-8 lg:p-12 border border-white/20"
+            className="premium-panel rounded-2xl p-8 lg:p-12"
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6 }}

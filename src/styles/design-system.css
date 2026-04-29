@@ -585,7 +585,7 @@ body {
 }
 
 /* Gradient Animation */
-.bg-300% {
+.bg-size-300 {
   background-size: 300% 300%;
 }
 
