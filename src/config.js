@@ -36,6 +36,11 @@ export const API_ENDPOINTS = {
   autoReplyFlows: `${API_BASE_URL}/api/auto-reply/flows`,
   autoReplyFlow: (flowId) => `${API_BASE_URL}/api/auto-reply/flows/${flowId}`,
   toggleFlow: (flowId) => `${API_BASE_URL}/api/auto-reply/flows/${flowId}/toggle`,
+
+  // Catalog
+  catalogProducts: `${API_BASE_URL}/api/catalog/products`,
+  catalogProduct: (productId) => `${API_BASE_URL}/api/catalog/products/${productId}`,
+  toggleCatalogProduct: (productId) => `${API_BASE_URL}/api/catalog/products/${productId}/toggle`,
   
   // Wallet
   wallet: `${API_BASE_URL}/api/wallet`,

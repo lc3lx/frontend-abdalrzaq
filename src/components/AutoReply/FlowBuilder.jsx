@@ -9,60 +9,83 @@ import {
   FaPause,
   FaArrowRight,
   FaCog,
+  FaShoppingBag,
 } from "react-icons/fa";
 
-const FlowBuilder = ({ isOpen, onClose, onSave, editingFlow }) => {
-  const [formData, setFormData] = useState({
-    name: "",
-    description: "",
-    platform: "All",
-    triggerKeywords: [],
-    triggerConditions: {
-      type: "keyword",
-      value: "",
+const defaultFlowData = {
+  name: "",
+  description: "",
+  platform: "All",
+  triggerKeywords: [],
+  triggerConditions: {
+    type: "keyword",
+    value: "",
+  },
+  flowSteps: [],
+  settings: {
+    maxRepliesPerUser: 3,
+    cooldownPeriod: 24,
+    workingHours: {
+      enabled: false,
+      startTime: "09:00",
+      endTime: "17:00",
+      timezone: "UTC",
     },
-    flowSteps: [],
-    settings: {
-      maxRepliesPerUser: 3,
-      cooldownPeriod: 24,
-      workingHours: {
-        enabled: false,
-        startTime: "09:00",
-        endTime: "17:00",
-        timezone: "UTC",
-      },
+    catalog: {
+      enabled: true,
+      prompt: "إذا بتحب تشوف الكتالوج اكتب كتالوج أو منتجات.",
+      triggerKeywords: ["كتالوج", "كاتلوج", "منتجات", "catalog", "products"],
+      maxProducts: 8,
     },
-  });
+  },
+};
+
+const createFlowData = (flow = {}) => ({
+  ...defaultFlowData,
+  ...flow,
+  triggerKeywords: flow.triggerKeywords || defaultFlowData.triggerKeywords,
+  triggerConditions: {
+    ...defaultFlowData.triggerConditions,
+    ...(flow.triggerConditions || {}),
+  },
+  flowSteps: flow.flowSteps || defaultFlowData.flowSteps,
+  settings: {
+    ...defaultFlowData.settings,
+    ...(flow.settings || {}),
+    workingHours: {
+      ...defaultFlowData.settings.workingHours,
+      ...(flow.settings?.workingHours || {}),
+    },
+    catalog: {
+      ...defaultFlowData.settings.catalog,
+      ...(flow.settings?.catalog || {}),
+      triggerKeywords:
+        flow.settings?.catalog?.triggerKeywords ||
+        defaultFlowData.settings.catalog.triggerKeywords,
+    },
+  },
+});
+
+const FlowBuilder = ({
+  isOpen,
+  onClose,
+  onSave,
+  editingFlow,
+  draftMode = false,
+  title,
+  saveLabel,
+}) => {
+  const [formData, setFormData] = useState(createFlowData());
 
   const [newKeyword, setNewKeyword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (editingFlow) {
-      setFormData(editingFlow);
+      setFormData(createFlowData(editingFlow));
     } else {
       // Reset form for new flow
-      setFormData({
-        name: "",
-        description: "",
-        platform: "All",
-        triggerKeywords: [],
-        triggerConditions: {
-          type: "keyword",
-          value: "",
-        },
-        flowSteps: [],
-        settings: {
-          maxRepliesPerUser: 3,
-          cooldownPeriod: 24,
-          workingHours: {
-            enabled: false,
-            startTime: "09:00",
-            endTime: "17:00",
-            timezone: "UTC",
-          },
-        },
-      });
+      setFormData(createFlowData());
     }
   }, [editingFlow, isOpen]);
 
@@ -79,6 +102,19 @@ const FlowBuilder = ({ isOpen, onClose, onSave, editingFlow }) => {
       [parent]: {
         ...prev[parent],
         [field]: value,
+      },
+    }));
+  };
+
+  const handleCatalogSettingChange = (field, value) => {
+    setFormData((prev) => ({
+      ...prev,
+      settings: {
+        ...prev.settings,
+        catalog: {
+          ...prev.settings.catalog,
+          [field]: value,
+        },
       },
     }));
   };
@@ -154,6 +190,20 @@ const FlowBuilder = ({ isOpen, onClose, onSave, editingFlow }) => {
       return;
     }
 
+    const hasEmptyReplyStep = formData.flowSteps.some(
+      (step) => step.stepType !== "end" && !step.replyContent?.trim()
+    );
+    if (hasEmptyReplyStep) {
+      alert("Please enter reply content for every reply step");
+      return;
+    }
+
+    if (draftMode) {
+      onSave({ ...formData, enabled: true });
+      onClose();
+      return;
+    }
+
     try {
       setIsLoading(true);
       const token = localStorage.getItem("token");
@@ -206,7 +256,7 @@ const FlowBuilder = ({ isOpen, onClose, onSave, editingFlow }) => {
           {/* Header */}
           <div className="flex justify-between items-center mb-8 pb-4 border-b border-white/10">
             <h3 className="text-3xl font-black text-white">
-              {editingFlow ? "Edit Flow" : "Create New Flow"}
+              {title || (editingFlow ? "Edit Flow" : "Create New Flow")}
             </h3>
             <button
               onClick={onClose}
@@ -363,6 +413,90 @@ const FlowBuilder = ({ isOpen, onClose, onSave, editingFlow }) => {
                       max="168"
                     />
                   </div>
+                </div>
+              </div>
+
+              {/* Catalog Offer */}
+              <div className="bg-white/5 border border-white/5 p-6 rounded-2xl">
+                <div className="flex items-center gap-3 mb-6">
+                  <FaShoppingBag className="text-teal-300 text-xl" />
+                  <h4 className="text-xl font-bold text-white">
+                    Catalog Offer
+                  </h4>
+                </div>
+                <div className="space-y-5">
+                  <label className="flex items-center gap-3 bg-white/5 p-4 border border-white/10 rounded-xl cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={formData.settings.catalog.enabled}
+                      onChange={(e) =>
+                        handleCatalogSettingChange("enabled", e.target.checked)
+                      }
+                      className="w-5 h-5 rounded border-gray-300 text-teal-500 focus:ring-teal-400"
+                    />
+                    <span className="text-sm font-bold text-white">
+                      Ask for catalog at the end of this flow
+                    </span>
+                  </label>
+
+                  {formData.settings.catalog.enabled && (
+                    <>
+                      <div>
+                        <label className="block text-sm font-medium text-white/80 mb-2">
+                          End Message
+                        </label>
+                        <textarea
+                          value={formData.settings.catalog.prompt}
+                          onChange={(e) =>
+                            handleCatalogSettingChange("prompt", e.target.value)
+                          }
+                          className="w-full p-3 bg-white/5 border border-white/10 text-white placeholder-white/40 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-400"
+                          rows="3"
+                          placeholder="إذا بتحب تشوف الكتالوج اكتب كتالوج أو منتجات."
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-white/80 mb-2">
+                          Catalog Trigger Words
+                        </label>
+                        <input
+                          type="text"
+                          value={formData.settings.catalog.triggerKeywords.join(", ")}
+                          onChange={(e) =>
+                            handleCatalogSettingChange(
+                              "triggerKeywords",
+                              e.target.value
+                                .split(",")
+                                .map((word) => word.trim())
+                                .filter(Boolean)
+                            )
+                          }
+                          className="w-full p-3 bg-white/5 border border-white/10 text-white placeholder-white/40 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-400"
+                          placeholder="كتالوج, منتجات, catalog"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-white/80 mb-2">
+                          Max Products To Send
+                        </label>
+                        <input
+                          type="number"
+                          value={formData.settings.catalog.maxProducts}
+                          onChange={(e) =>
+                            handleCatalogSettingChange(
+                              "maxProducts",
+                              Math.max(1, parseInt(e.target.value) || 1)
+                            )
+                          }
+                          className="w-full p-3 bg-white/5 border border-white/10 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-400"
+                          min="1"
+                          max="20"
+                        />
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -610,7 +744,7 @@ const FlowBuilder = ({ isOpen, onClose, onSave, editingFlow }) => {
               ) : (
                 <>
                   <FaSave />
-                  {editingFlow ? "Update Flow" : "Create Flow"}
+                  {saveLabel || (editingFlow ? "Update Flow" : "Create Flow")}
                 </>
               )}
             </button>

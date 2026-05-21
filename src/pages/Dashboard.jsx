@@ -18,6 +18,7 @@ import SettingsPage from "./SettingsPage";
 import InboxPage from "./InboxPage";
 import AutoReplyPage from "./AutoReplyPage";
 import WalletPage from "./WalletPage";
+import CatalogPage from "./CatalogPage";
 import PublishedPosts from "../components/Dashboard/PublishedPosts";
 import SubscriptionStatus from "../components/SubscriptionStatus";
 
@@ -42,6 +43,7 @@ const Dashboard = () => {
     { id: "generate", label: "Create Post", icon: FaPlus },
     { id: "inbox", label: "Inbox", icon: FaInbox },
     { id: "auto-reply", label: "Auto Reply", icon: FaRobot },
+    { id: "catalog", label: "Catalog", icon: FaShoppingBag },
     { id: "published", label: "Published Posts", icon: FaChartBar },
     { id: "wallet", label: "Wallet", icon: FaWallet },
     { id: "settings", label: "Settings", icon: FaCog },
@@ -57,6 +59,8 @@ const Dashboard = () => {
         return <InboxPage />;
       case "auto-reply":
         return <AutoReplyPage />;
+      case "catalog":
+        return <CatalogPage />;
       case "published":
         return <PublishedPosts />;
       case "wallet":

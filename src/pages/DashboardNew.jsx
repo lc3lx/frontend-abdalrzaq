@@ -17,6 +17,7 @@ import {
   FaSearch,
   FaSun,
   FaSignOutAlt,
+  FaShoppingBag,
 } from "react-icons/fa";
 
 // Import existing pages
@@ -26,6 +27,7 @@ import SettingsPage from "./SettingsPage";
 import InboxPage from "./InboxPage";
 import AutoReplyPage from "./AutoReplyPage";
 import WalletPage from "./WalletPage";
+import CatalogPage from "./CatalogPage";
 import PublishedPosts from "../components/Dashboard/PublishedPosts";
 import SubscriptionStatus from "../components/SubscriptionStatus";
 
@@ -97,6 +99,12 @@ const Dashboard = () => {
       label: "الرد التلقائي",
       icon: FaRobot,
       color: "from-red-500 to-red-600",
+    },
+    {
+      id: "catalog",
+      label: "Catalog",
+      icon: FaShoppingBag,
+      color: "from-teal-500 to-teal-600",
     },
     {
       id: "published",
@@ -339,6 +347,8 @@ const Dashboard = () => {
         return <InboxPage />;
       case "auto-reply":
         return <AutoReplyPage />;
+      case "catalog":
+        return <CatalogPage />;
       case "published":
         return <PublishedPosts />;
       case "wallet":
