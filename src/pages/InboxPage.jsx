@@ -1,22 +1,38 @@
-import { useState } from "react";
-import { useMessages } from "../hooks/useMessages";
-import ReplyModal from "../components/Inbox/ReplyModal";
+import { useEffect, useMemo, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
-  FaTwitter,
-  FaFacebook,
-  FaInstagram,
-  FaLinkedin,
   FaSync,
-  FaEye,
-  FaArchive,
-  FaFilter,
-  FaSearch,
+  FaInbox,
   FaEnvelope,
   FaEnvelopeOpen,
-  FaReply,
+  FaPaperPlane,
+  FaArchive,
+  FaTimes,
 } from "react-icons/fa";
+import { useMessages } from "../hooks/useMessages";
+import {
+  PageHeader,
+  StatCard,
+  Card,
+  Button,
+  Badge,
+  Skeleton,
+  EmptyState,
+  Field,
+} from "../components/ui/kit";
 
-const InboxPage = () => {
+const PLATFORMS = ["Facebook", "Instagram", "WhatsApp", "Telegram", "TikTok", "Twitter", "LinkedIn"];
+
+function timeAgo(date) {
+  if (!date) return "";
+  const s = Math.floor((Date.now() - new Date(date).getTime()) / 1000);
+  if (s < 60) return "just now";
+  if (s < 3600) return `${Math.floor(s / 60)}m`;
+  if (s < 86400) return `${Math.floor(s / 3600)}h`;
+  return `${Math.floor(s / 86400)}d`;
+}
+
+export default function InboxPage() {
   const {
     messages,
     stats,
@@ -29,420 +45,280 @@ const InboxPage = () => {
     replyToMessage,
   } = useMessages();
 
-  const [filters, setFilters] = useState({
-    platform: "",
-    isRead: "",
-    search: "",
-  });
-  const [selectedMessages, setSelectedMessages] = useState([]);
-  const [replyModal, setReplyModal] = useState({
-    isOpen: false,
-    message: null,
-  });
-  const [isReplying, setIsReplying] = useState(false);
+  const [platform, setPlatform] = useState("");
+  const [unreadOnly, setUnreadOnly] = useState(false);
+  const [page, setPage] = useState(1);
+  const [selected, setSelected] = useState(null);
+  const [reply, setReply] = useState("");
+  const [sending, setSending] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+  const [error, setError] = useState("");
 
-  const platforms = [
-    { name: "Twitter", icon: FaTwitter, color: "text-blue-400" },
-    { name: "Facebook", icon: FaFacebook, color: "text-blue-600" },
-    { name: "Instagram", icon: FaInstagram, color: "text-pink-500" },
-    { name: "LinkedIn", icon: FaLinkedin, color: "text-blue-700" },
-  ];
+  const filters = useMemo(() => {
+    const f = { page };
+    if (platform) f.platform = platform;
+    if (unreadOnly) f.isRead = "false";
+    return f;
+  }, [platform, unreadOnly, page]);
 
-  const getPlatformIcon = (platform) => {
-    const platformData = platforms.find((p) => p.name === platform);
-    if (platformData) {
-      const Icon = platformData.icon;
-      return <Icon className={`${platformData.color} text-lg`} />;
-    }
-    return null;
-  };
+  useEffect(() => {
+    fetchMessages(filters).catch(() => setError("Failed to load messages"));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters]);
 
-  const handleFilterChange = (key, value) => {
-    const newFilters = { ...filters, [key]: value };
-    setFilters(newFilters);
-    fetchMessages(newFilters);
-  };
-
-  const handleSearch = (searchTerm) => {
-    const newFilters = { ...filters, search: searchTerm };
-    setFilters(newFilters);
-    fetchMessages(newFilters);
-  };
-
-  const handleSelectMessage = (messageId) => {
-    setSelectedMessages((prev) =>
-      prev.includes(messageId)
-        ? prev.filter((id) => id !== messageId)
-        : [...prev, messageId]
-    );
-  };
-
-  const handleSelectAll = () => {
-    if (selectedMessages.length === messages.length) {
-      setSelectedMessages([]);
-    } else {
-      setSelectedMessages(messages.map((msg) => msg._id));
+  const openMessage = async (msg) => {
+    setSelected(msg);
+    setReply("");
+    if (!msg.isRead) {
+      try {
+        await markAsRead(msg._id);
+      } catch (_) {}
     }
   };
 
-  const handleMarkAsRead = async (messageId) => {
-    try {
-      await markAsRead(messageId);
-    } catch (error) {
-      alert("Failed to mark message as read");
-    }
-  };
-
-  const handleArchive = async (messageId) => {
-    try {
-      await archiveMessage(messageId);
-    } catch (error) {
-      alert("Failed to archive message");
-    }
-  };
-
-  const handleBulkAction = async (action) => {
-    try {
-      if (action === "read") {
-        await Promise.all(selectedMessages.map((id) => markAsRead(id)));
-      } else if (action === "archive") {
-        await Promise.all(selectedMessages.map((id) => archiveMessage(id)));
-      }
-      setSelectedMessages([]);
-    } catch (error) {
-      alert(`Failed to ${action} messages`);
-    }
-  };
-
-  const handleSync = async () => {
+  const onSync = async () => {
+    setSyncing(true);
+    setError("");
     try {
       await syncMessages();
-      alert("Messages synced successfully!");
-    } catch (error) {
-      alert("Failed to sync messages");
-    }
-  };
-
-  const handleReply = (message) => {
-    setReplyModal({
-      isOpen: true,
-      message: message,
-    });
-  };
-
-  const handleSendReply = async (content, imageUrl) => {
-    try {
-      setIsReplying(true);
-      await replyToMessage(replyModal.message._id, content, imageUrl);
-      setReplyModal({ isOpen: false, message: null });
-      alert("Reply sent successfully!");
-    } catch (error) {
-      alert("Failed to send reply");
+    } catch (_) {
+      setError("Sync failed. Please try again.");
     } finally {
-      setIsReplying(false);
+      setSyncing(false);
     }
   };
 
-  const closeReplyModal = () => {
-    setReplyModal({ isOpen: false, message: null });
+  const onReply = async () => {
+    if (!reply.trim() || !selected) return;
+    setSending(true);
+    setError("");
+    try {
+      await replyToMessage(selected._id, reply.trim());
+      setReply("");
+    } catch (e) {
+      setError(e.response?.data?.error || "Could not send reply.");
+    } finally {
+      setSending(false);
+    }
   };
 
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString("ar-SA", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
-
-  const truncateText = (text, maxLength = 100) => {
-    if (text.length <= maxLength) return text;
-    return text.substring(0, maxLength) + "...";
+  const onArchive = async (id) => {
+    try {
+      await archiveMessage(id);
+      if (selected?._id === id) setSelected(null);
+    } catch (_) {}
   };
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto">
-      <div className="flex justify-between items-center mb-8">
-        <h2 className="text-3xl font-bold text-white">Inbox</h2>
-        <button
-          onClick={handleSync}
-          disabled={isLoading}
-          className="premium-button disabled:opacity-50"
-        >
-          <FaSync className={isLoading ? "animate-spin" : ""} />
-          Sync Messages
-        </button>
-      </div>
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-white/10 backdrop-blur-xl border border-white/20 p-6 rounded-2xl shadow-xl">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-white/70">Total Messages</p>
-              <p className="text-3xl font-bold text-white">{stats.total}</p>
-            </div>
-            <FaEnvelope className="text-blue-400 text-3xl" />
-          </div>
-        </div>
-
-        <div className="bg-white/10 backdrop-blur-xl border border-white/20 p-6 rounded-2xl shadow-xl">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-white/70">Unread</p>
-              <p className="text-3xl font-bold text-white">{stats.unread}</p>
-            </div>
-            <FaEnvelopeOpen className="text-red-400 text-3xl" />
-          </div>
-        </div>
-
-        {Object.entries(stats.byPlatform).map(([platform, data]) => {
-          const platformData = platforms.find((p) => p.name === platform);
-          if (!platformData) return null;
-
-          return (
-            <div
-              key={platform}
-              className="bg-white/10 backdrop-blur-xl border border-white/20 p-6 rounded-2xl shadow-xl"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-white/70">{platform}</p>
-                  <p className="text-2xl font-bold text-white">
-                    {data.total}
-                  </p>
-                  {data.unread > 0 && (
-                    <p className="text-sm text-red-400 font-semibold mt-1">{data.unread} unread</p>
-                  )}
-                </div>
-                <div className="text-2xl bg-white/5 p-3 rounded-xl border border-white/10">
-                    {getPlatformIcon(platform)}
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Filters */}
-      <div className="bg-white/10 backdrop-blur-xl p-6 rounded-2xl shadow-xl mt-6">
-        <div className="flex flex-wrap gap-4 items-center">
-          <div className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-purple-500/20 rounded-xl flex items-center justify-center">
-                <FaFilter className="text-purple-400" />
-            </div>
-            <span className="text-sm font-semibold text-white/90">Filters:</span>
-          </div>
-
-          <select
-            value={filters.platform}
-            onChange={(e) => handleFilterChange("platform", e.target.value)}
-            className="px-4 py-3 bg-white/[0.08] border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-teal-300/40 transition-all appearance-none"
-          >
-            <option value="" className="bg-slate-800">All Platforms</option>
-            {platforms.map((platform) => (
-              <option key={platform.name} value={platform.name} className="bg-slate-800">
-                {platform.name}
-              </option>
-            ))}
-          </select>
-
-          <select
-            value={filters.isRead}
-            onChange={(e) => handleFilterChange("isRead", e.target.value)}
-            className="px-4 py-3 bg-white/[0.08] border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-teal-300/40 transition-all appearance-none"
-          >
-            <option value="" className="bg-slate-800">All Messages</option>
-            <option value="false" className="bg-slate-800">Unread Only</option>
-            <option value="true" className="bg-slate-800">Read Only</option>
-          </select>
-
-          <div className="flex items-center gap-2 flex-1 relative">
-            <FaSearch className="absolute left-4 text-white/50" />
-            <input
-              type="text"
-              placeholder="Search messages..."
-              value={filters.search}
-              onChange={(e) => handleSearch(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 bg-white/[0.08] border border-white/10 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-teal-300/40 transition-all"
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Messages List */}
-      <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-xl mt-8 overflow-hidden">
-        {messages.length === 0 ? (
-          <div className="p-16 text-center text-white">
-            <div className="w-24 h-24 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6">
-                <FaEnvelope className="text-white/40 text-5xl" />
-            </div>
-            <p className="text-xl font-semibold mb-2">No messages found</p>
-            <p className="text-white/60">
-              {filters.platform || filters.isRead || filters.search
-                ? "Try adjusting your filters to see more results."
-                : "Sync your social media accounts to start receiving messages."}
-            </p>
-          </div>
-        ) : (
-          <>
-            {/* Bulk Actions */}
-            {selectedMessages.length > 0 && (
-              <div className="p-4 bg-purple-900/40 border-b border-white/10 flex items-center justify-between">
-                <span className="font-semibold text-purple-200">
-                  {selectedMessages.length} message(s) selected
-                </span>
-                <div className="flex gap-3">
-                  <button
-                    onClick={() => handleBulkAction("read")}
-                    className="bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-purple-700 transition"
-                  >
-                    Mark as Read
-                  </button>
-                  <button
-                    onClick={() => handleBulkAction("archive")}
-                    className="bg-white/20 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-white/30 transition"
-                  >
-                    Archive
-                  </button>
-                </div>
-              </div>
-            )}
-
-            <div className="divide-y divide-white/10">
-              {messages.map((message) => (
-                <div
-                  key={message._id}
-                  className={`p-6 hover:bg-white/5 transition-all duration-300 ${
-                    !message.isRead
-                      ? "bg-purple-900/20 border-l-4 border-purple-500"
-                      : ""
-                  }`}
-                >
-                  <div className="flex items-start gap-4">
-                    <input
-                      type="checkbox"
-                      checked={selectedMessages.includes(message._id)}
-                      onChange={() => handleSelectMessage(message._id)}
-                      className="mt-1.5 h-5 w-5 text-teal-300 border-white/30 rounded bg-white/10 focus:ring-teal-300"
-                    />
-
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className="bg-white/10 p-2 rounded-lg">
-                            {getPlatformIcon(message.platform)}
-                        </div>
-                        <span className="font-bold text-lg text-white">
-                          {message.senderName}
-                        </span>
-                        {message.senderUsername && (
-                          <span className="text-white/50 text-sm">
-                            @{message.senderUsername}
-                          </span>
-                        )}
-                        <span className="text-white/40 text-sm ml-auto">
-                          {formatDate(message.receivedAt)}
-                        </span>
-                        {!message.isRead && (
-                          <span className="bg-purple-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
-                            New
-                          </span>
-                        )}
-                      </div>
-
-                      <p className="text-white/80 mb-4 ml-12 text-lg leading-relaxed">
-                        {truncateText(message.content)}
-                      </p>
-
-                      {message.attachments &&
-                        message.attachments.length > 0 && (
-                          <div className="flex gap-2 mb-2 ml-12">
-                            {message.attachments.map((attachment, index) => (
-                              <span
-                                key={index}
-                                className="bg-white/10 border border-white/20 text-white/80 text-xs px-3 py-1.5 rounded-lg flex items-center gap-2"
-                              >
-                                📎 {attachment.mediaType || "Photo"}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                    </div>
-
-                    <div className="flex flex-col gap-3">
-                      <button
-                        onClick={() => handleReply(message)}
-                        className="text-green-400 hover:text-green-300 bg-green-400/10 hover:bg-green-400/20 p-3 rounded-xl transition-all"
-                        title="Reply"
-                      >
-                        <FaReply />
-                      </button>
-                      {!message.isRead && (
-                        <button
-                          onClick={() => handleMarkAsRead(message._id)}
-                          className="text-teal-300 hover:text-teal-200 bg-teal-400/10 hover:bg-teal-400/20 p-3 rounded-xl transition-all"
-                          title="Mark as read"
-                        >
-                          <FaEye />
-                        </button>
-                      )}
-                      <button
-                        onClick={() => handleArchive(message._id)}
-                        className="text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 p-3 rounded-xl transition-all"
-                        title="Archive"
-                      >
-                        <FaArchive />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Pagination */}
-            {pagination.pages > 1 && (
-              <div className="p-6 border-t border-white/10 flex justify-between items-center bg-white/5">
-                <button
-                  onClick={() =>
-                    fetchMessages({ ...filters, page: pagination.current - 1 })
-                  }
-                  disabled={!pagination.hasPrev}
-                  className="px-6 py-2 bg-white/10 text-white font-medium rounded-lg hover:bg-white/20 disabled:opacity-50 transition border border-white/10"
-                >
-                  Previous
-                </button>
-
-                <span className="text-sm font-medium text-white/70">
-                  Page <span className="text-white">{pagination.current}</span> of <span className="text-white">{pagination.pages}</span>
-                </span>
-
-                <button
-                  onClick={() =>
-                    fetchMessages({ ...filters, page: pagination.current + 1 })
-                  }
-                  disabled={!pagination.hasNext}
-                  className="px-6 py-2 bg-white/10 text-white font-medium rounded-lg hover:bg-white/20 disabled:opacity-50 transition border border-white/10"
-                >
-                  Next
-                </button>
-              </div>
-            )}
-          </>
-        )}
-      </div>
-
-      {/* Reply Modal */}
-      <ReplyModal
-        isOpen={replyModal.isOpen}
-        onClose={closeReplyModal}
-        onReply={handleSendReply}
-        message={replyModal.message}
-        isLoading={isReplying}
+    <div>
+      <PageHeader
+        title="Inbox"
+        subtitle="Conversations across all your connected platforms"
+        actions={
+          <Button variant="secondary" onClick={onSync} loading={syncing}>
+            <FaSync /> Sync
+          </Button>
+        }
       />
+
+      <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 mb-5">
+        <StatCard icon={FaEnvelope} label="Total" value={stats.total ?? 0} />
+        <StatCard icon={FaEnvelopeOpen} label="Unread" value={stats.unread ?? 0} />
+        <StatCard icon={FaInbox} label="Platforms" value={Object.keys(stats.byPlatform || {}).length} />
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2 mb-4">
+        <select
+          className="ss-select !w-auto"
+          value={platform}
+          onChange={(e) => {
+            setPage(1);
+            setPlatform(e.target.value);
+          }}
+        >
+          <option value="">All platforms</option>
+          {PLATFORMS.map((p) => (
+            <option key={p} value={p}>{p}</option>
+          ))}
+        </select>
+        <Button
+          variant={unreadOnly ? "primary" : "secondary"}
+          onClick={() => {
+            setPage(1);
+            setUnreadOnly((v) => !v);
+          }}
+        >
+          Unread only
+        </Button>
+      </div>
+
+      {error && (
+        <div className="ss-card ss-card-pad mb-4" style={{ borderColor: "var(--ss-danger)" }}>
+          <span style={{ color: "var(--ss-danger)" }}>{error}</span>
+        </div>
+      )}
+
+      <div className="grid gap-4 lg:grid-cols-[1fr_1.2fr]">
+        <div className="space-y-3">
+          {isLoading ? (
+            Array.from({ length: 5 }).map((_, i) => (
+              <Card key={i}>
+                <Skeleton style={{ width: "45%" }} />
+                <Skeleton style={{ width: "85%", marginTop: 10 }} />
+              </Card>
+            ))
+          ) : messages.length === 0 ? (
+            <EmptyState
+              icon={FaInbox}
+              title="No messages"
+              description="When customers message your connected accounts, they’ll appear here. Try syncing."
+              action={<Button onClick={onSync} loading={syncing}><FaSync /> Sync now</Button>}
+            />
+          ) : (
+            <motion.div initial="hidden" animate="show" variants={{ show: { transition: { staggerChildren: 0.04 } } }}>
+              {messages.map((msg) => (
+                <motion.button
+                  key={msg._id}
+                  variants={{ hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0 } }}
+                  onClick={() => openMessage(msg)}
+                  className="ss-card ss-card-pad w-full text-left mb-3 block"
+                  style={{
+                    borderColor: selected?._id === msg._id ? "var(--ss-accent)" : "var(--ss-border)",
+                  }}
+                  whileHover={{ y: -2 }}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      {!msg.isRead && (
+                        <span className="h-2 w-2 rounded-full flex-none" style={{ background: "var(--ss-accent)" }} />
+                      )}
+                      <span className="font-semibold truncate">{msg.senderName || msg.senderId}</span>
+                      <Badge variant="accent">{msg.platform}</Badge>
+                    </div>
+                    <span className="text-xs flex-none" style={{ color: "var(--ss-text-faint)" }}>
+                      {timeAgo(msg.receivedAt)}
+                    </span>
+                  </div>
+                  <p className="mt-1.5 text-sm line-clamp-2" style={{ color: "var(--ss-text-muted)" }}>
+                    {msg.content || "(no text)"}
+                  </p>
+                </motion.button>
+              ))}
+            </motion.div>
+          )}
+
+          {pagination.pages > 1 && (
+            <div className="flex items-center justify-between pt-2">
+              <Button variant="ghost" disabled={!pagination.hasPrev} onClick={() => setPage((p) => p - 1)}>
+                Previous
+              </Button>
+              <span className="text-sm" style={{ color: "var(--ss-text-muted)" }}>
+                Page {pagination.current} of {pagination.pages}
+              </span>
+              <Button variant="ghost" disabled={!pagination.hasNext} onClick={() => setPage((p) => p + 1)}>
+                Next
+              </Button>
+            </div>
+          )}
+        </div>
+
+        <div className="hidden lg:block">
+          <AnimatePresence mode="wait">
+            {selected ? (
+              <motion.div
+                key={selected._id}
+                initial={{ opacity: 0, x: 12 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -12 }}
+              >
+                <ConversationPanel
+                  message={selected}
+                  reply={reply}
+                  setReply={setReply}
+                  onReply={onReply}
+                  onArchive={() => onArchive(selected._id)}
+                  sending={sending}
+                />
+              </motion.div>
+            ) : (
+              <EmptyState icon={FaEnvelopeOpen} title="Select a conversation" description="Choose a message on the left to read and reply." />
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+
+      <AnimatePresence>
+        {selected && (
+          <motion.div
+            className="lg:hidden fixed inset-0 z-50 flex items-end"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <div className="absolute inset-0 bg-black/50" onClick={() => setSelected(null)} />
+            <motion.div
+              className="relative w-full"
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ type: "spring", damping: 28, stiffness: 260 }}
+            >
+              <ConversationPanel
+                message={selected}
+                reply={reply}
+                setReply={setReply}
+                onReply={onReply}
+                onArchive={() => onArchive(selected._id)}
+                sending={sending}
+                onClose={() => setSelected(null)}
+                rounded
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
-};
+}
 
-export default InboxPage;
+function ConversationPanel({ message, reply, setReply, onReply, onArchive, sending, onClose, rounded }) {
+  return (
+    <div className={`ss-card ss-card-pad ${rounded ? "rounded-b-none" : ""}`}>
+      <div className="flex items-center justify-between gap-2 mb-3">
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="font-bold truncate">{message.senderName || message.senderId}</span>
+          <Badge variant="accent">{message.platform}</Badge>
+        </div>
+        <div className="flex items-center gap-1">
+          <Button variant="ghost" onClick={onArchive} title="Archive" className="!px-2.5">
+            <FaArchive />
+          </Button>
+          {onClose && (
+            <Button variant="ghost" onClick={onClose} className="!px-2.5">
+              <FaTimes />
+            </Button>
+          )}
+        </div>
+      </div>
+
+      <div className="rounded-xl p-3 mb-4 text-sm" style={{ background: "var(--ss-surface-2)" }}>
+        {message.content || "(no text)"}
+      </div>
+
+      <Field label="Reply">
+        <textarea
+          className="ss-textarea"
+          rows={3}
+          placeholder="Write a reply…"
+          value={reply}
+          onChange={(e) => setReply(e.target.value)}
+        />
+      </Field>
+      <div className="flex justify-end">
+        <Button onClick={onReply} loading={sending} disabled={!reply.trim()}>
+          <FaPaperPlane /> Send reply
+        </Button>
+      </div>
+    </div>
+  );
+}

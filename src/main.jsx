@@ -6,6 +6,7 @@ import AOS from "aos";
 import "aos/dist/aos.css";
 import "./index.css";
 import "./styles/design-system.css";
+import "./styles/app-shell.css";
 
 AOS.init({ duration: 1000, once: true }); // Initialize AOS globally
 

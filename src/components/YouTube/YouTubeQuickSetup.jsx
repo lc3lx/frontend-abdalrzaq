@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { API_BASE_URL } from "../../config";
 import {
   FaYoutube,
   FaCheck,
@@ -23,7 +24,7 @@ const YouTubeQuickSetup = ({ onClose, onSuccess }) => {
       const token = localStorage.getItem("token");
 
       const response = await axios.get(
-        "https://www.sushiluha.com/api/youtube/auth",
+        API_BASE_URL + "/api/youtube/auth",
         {
           headers: { Authorization: `Bearer ${token}` },
           withCredentials: true,
@@ -74,7 +75,7 @@ const YouTubeQuickSetup = ({ onClose, onSuccess }) => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.get(
-        "https://www.sushiluha.com/api/youtube/channel",
+        API_BASE_URL + "/api/youtube/channel",
         {
           headers: { Authorization: `Bearer ${token}` },
           withCredentials: true,
@@ -147,7 +148,7 @@ const YouTubeQuickSetup = ({ onClose, onSuccess }) => {
                   <li>أنشئ OAuth 2.0 credentials</li>
                   <li>احصل على Client ID و Client Secret</li>
                   <li>
-                    أضف Redirect URI: https://www.sushiluha.com/api/youtube/callback
+                    أضف Redirect URI: {API_BASE_URL}/api/youtube/callback
                   </li>
                 </ol>
               </div>

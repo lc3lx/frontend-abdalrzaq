@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { API_BASE_URL } from "../../config";
 import { FaTimes, FaCreditCard, FaLock, FaCheck } from "react-icons/fa";
 import axios from "axios";
 
@@ -111,7 +112,7 @@ const AddCardModal = ({ isOpen, onClose, onCardAdded }) => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.post(
-        "https://www.sushiluha.com/api/wallet/cards",
+        API_BASE_URL + "/api/wallet/cards",
         {
           ...formData,
           cardNumber: formData.cardNumber.replace(/\s/g, ""),

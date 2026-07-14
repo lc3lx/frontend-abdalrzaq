@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { API_BASE_URL } from "../config";
 import { Navigate } from "react-router-dom";
 import axios from "axios";
 
@@ -21,7 +22,7 @@ const AdminRoute = ({ children }) => {
 
       // Try to access admin dashboard stats to check if user is admin
       const response = await axios.get(
-        "https://www.sushiluha.com/api/admin/dashboard/stats",
+        API_BASE_URL + "/api/admin/dashboard/stats",
         {
           headers: { Authorization: `Bearer ${token}` },
           withCredentials: true,

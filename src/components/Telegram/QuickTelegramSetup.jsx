@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { API_BASE_URL } from "../../config";
 import { FaTelegram, FaCheck, FaTimes, FaInfoCircle, FaCog } from "react-icons/fa";
 import axios from "axios";
 
@@ -20,7 +21,7 @@ const QuickTelegramSetup = ({ onClose, onSuccess }) => {
       const token = localStorage.getItem("token");
       
       const response = await axios.post(
-        "https://www.sushiluha.com/api/telegram/quick-setup",
+        API_BASE_URL + "/api/telegram/quick-setup",
         { botToken, botUsername },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -32,7 +33,7 @@ const QuickTelegramSetup = ({ onClose, onSuccess }) => {
         setStep(2);
         // Get connection URL
         const urlResponse = await axios.get(
-          "https://www.sushiluha.com/api/telegram/connection-url",
+          API_BASE_URL + "/api/telegram/connection-url",
           {
             headers: { Authorization: `Bearer ${token}` },
             withCredentials: true,

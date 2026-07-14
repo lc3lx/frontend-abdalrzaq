@@ -1,36 +1,21 @@
 import { useState, useEffect } from "react";
+import { API_BASE_URL } from "../../config";
 import axios from "axios";
-import {
-  FaPlus,
-  FaTrash,
-  FaSave,
-  FaTimes,
-  FaPlay,
-  FaPause,
-  FaArrowRight,
-  FaCog,
-  FaShoppingBag,
-} from "react-icons/fa";
+import { motion, AnimatePresence } from "framer-motion";
+import { FaPlus, FaTrash, FaSave, FaTimes, FaShoppingBag, FaRobot } from "react-icons/fa";
+import { Button, Badge, Field } from "../ui/kit";
 
 const defaultFlowData = {
   name: "",
   description: "",
   platform: "All",
   triggerKeywords: [],
-  triggerConditions: {
-    type: "keyword",
-    value: "",
-  },
+  triggerConditions: { type: "keyword", value: "" },
   flowSteps: [],
   settings: {
     maxRepliesPerUser: 3,
     cooldownPeriod: 24,
-    workingHours: {
-      enabled: false,
-      startTime: "09:00",
-      endTime: "17:00",
-      timezone: "UTC",
-    },
+    workingHours: { enabled: false, startTime: "09:00", endTime: "17:00", timezone: "UTC" },
     catalog: {
       enabled: true,
       prompt: "إذا بتحب تشوف الكتالوج اكتب كتالوج أو منتجات.",
@@ -44,159 +29,95 @@ const createFlowData = (flow = {}) => ({
   ...defaultFlowData,
   ...flow,
   triggerKeywords: flow.triggerKeywords || defaultFlowData.triggerKeywords,
-  triggerConditions: {
-    ...defaultFlowData.triggerConditions,
-    ...(flow.triggerConditions || {}),
-  },
+  triggerConditions: { ...defaultFlowData.triggerConditions, ...(flow.triggerConditions || {}) },
   flowSteps: flow.flowSteps || defaultFlowData.flowSteps,
   settings: {
     ...defaultFlowData.settings,
     ...(flow.settings || {}),
-    workingHours: {
-      ...defaultFlowData.settings.workingHours,
-      ...(flow.settings?.workingHours || {}),
-    },
+    workingHours: { ...defaultFlowData.settings.workingHours, ...(flow.settings?.workingHours || {}) },
     catalog: {
       ...defaultFlowData.settings.catalog,
       ...(flow.settings?.catalog || {}),
-      triggerKeywords:
-        flow.settings?.catalog?.triggerKeywords ||
-        defaultFlowData.settings.catalog.triggerKeywords,
+      triggerKeywords: flow.settings?.catalog?.triggerKeywords || defaultFlowData.settings.catalog.triggerKeywords,
     },
   },
 });
 
-const FlowBuilder = ({
-  isOpen,
-  onClose,
-  onSave,
-  editingFlow,
-  draftMode = false,
-  title,
-  saveLabel,
-}) => {
-  const [formData, setFormData] = useState(createFlowData());
+const STEP_ICON = {
+  immediate_reply: "⚡",
+  delayed_reply: "⏰",
+  conditional_reply: "❓",
+  ai_reply: "🤖",
+  end: "🏁",
+};
 
+export default function FlowBuilder({ isOpen, onClose, onSave, editingFlow, draftMode = false, title, saveLabel }) {
+  const [formData, setFormData] = useState(createFlowData());
   const [newKeyword, setNewKeyword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    if (editingFlow) {
-      setFormData(createFlowData(editingFlow));
-    } else {
-      // Reset form for new flow
-      setFormData(createFlowData());
-    }
+    setFormData(createFlowData(editingFlow || undefined));
+    setError("");
   }, [editingFlow, isOpen]);
 
-  const handleInputChange = (field, value) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
+  const setField = (field, value) => setFormData((p) => ({ ...p, [field]: value }));
+  const setNested = (parent, field, value) =>
+    setFormData((p) => ({ ...p, [parent]: { ...p[parent], [field]: value } }));
+  const setCatalog = (field, value) =>
+    setFormData((p) => ({ ...p, settings: { ...p.settings, catalog: { ...p.settings.catalog, [field]: value } } }));
 
-  const handleNestedInputChange = (parent, field, value) => {
-    setFormData((prev) => ({
-      ...prev,
-      [parent]: {
-        ...prev[parent],
-        [field]: value,
-      },
-    }));
-  };
-
-  const handleCatalogSettingChange = (field, value) => {
-    setFormData((prev) => ({
-      ...prev,
-      settings: {
-        ...prev.settings,
-        catalog: {
-          ...prev.settings.catalog,
-          [field]: value,
-        },
-      },
-    }));
-  };
-
-  const handleAddKeyword = () => {
-    if (
-      newKeyword.trim() &&
-      !formData.triggerKeywords.includes(newKeyword.trim())
-    ) {
-      setFormData((prev) => ({
-        ...prev,
-        triggerKeywords: [...prev.triggerKeywords, newKeyword.trim()],
-      }));
+  const addKeyword = () => {
+    const k = newKeyword.trim();
+    if (k && !formData.triggerKeywords.includes(k)) {
+      setFormData((p) => ({ ...p, triggerKeywords: [...p.triggerKeywords, k] }));
       setNewKeyword("");
     }
   };
+  const removeKeyword = (keyword) =>
+    setFormData((p) => ({ ...p, triggerKeywords: p.triggerKeywords.filter((k) => k !== keyword) }));
 
-  const handleRemoveKeyword = (keyword) => {
-    setFormData((prev) => ({
-      ...prev,
-      triggerKeywords: prev.triggerKeywords.filter((k) => k !== keyword),
+  const addStep = () =>
+    setFormData((p) => ({
+      ...p,
+      flowSteps: [
+        ...p.flowSteps,
+        {
+          stepNumber: p.flowSteps.length + 1,
+          stepType: "immediate_reply",
+          delay: 0,
+          condition: "always",
+          conditionValue: "",
+          replyContent: "",
+          replyImage: "",
+          useAI: false,
+          aiPrompt: "",
+          aiIncludeProducts: false,
+          nextStep: null,
+          isEndStep: false,
+        },
+      ],
     }));
-  };
-
-  const handleAddStep = () => {
-    const newStep = {
-      stepNumber: formData.flowSteps.length + 1,
-      stepType: "immediate_reply",
-      delay: 0,
-      condition: "always",
-      conditionValue: "",
-      replyContent: "",
-      replyImage: "",
-      nextStep: null,
-      isEndStep: false,
-    };
-
-    setFormData((prev) => ({
-      ...prev,
-      flowSteps: [...prev.flowSteps, newStep],
+  const updateStep = (index, field, value) =>
+    setFormData((p) => ({
+      ...p,
+      flowSteps: p.flowSteps.map((s, i) => (i === index ? { ...s, [field]: value } : s)),
     }));
-  };
-
-  const handleUpdateStep = (index, field, value) => {
-    setFormData((prev) => ({
-      ...prev,
-      flowSteps: prev.flowSteps.map((step, i) =>
-        i === index ? { ...step, [field]: value } : step
-      ),
+  const removeStep = (index) =>
+    setFormData((p) => ({
+      ...p,
+      flowSteps: p.flowSteps.filter((_, i) => i !== index).map((s, i) => ({ ...s, stepNumber: i + 1 })),
     }));
-  };
-
-  const handleRemoveStep = (index) => {
-    setFormData((prev) => ({
-      ...prev,
-      flowSteps: prev.flowSteps
-        .filter((_, i) => i !== index)
-        .map((step, i) => ({
-          ...step,
-          stepNumber: i + 1,
-        })),
-    }));
-  };
 
   const handleSave = async () => {
-    if (!formData.name.trim()) {
-      alert("Please enter a flow name");
-      return;
-    }
-
-    if (formData.flowSteps.length === 0) {
-      alert("Please add at least one step");
-      return;
-    }
-
-    const hasEmptyReplyStep = formData.flowSteps.some(
-      (step) => step.stepType !== "end" && !step.replyContent?.trim()
+    setError("");
+    if (!formData.name.trim()) return setError("Please enter a flow name.");
+    if (formData.flowSteps.length === 0) return setError("Please add at least one step.");
+    const hasEmptyReply = formData.flowSteps.some(
+      (s) => s.stepType !== "end" && s.stepType !== "ai_reply" && !s.replyContent?.trim()
     );
-    if (hasEmptyReplyStep) {
-      alert("Please enter reply content for every reply step");
-      return;
-    }
+    if (hasEmptyReply) return setError("Please enter reply content for every reply step.");
 
     if (draftMode) {
       onSave({ ...formData, enabled: true });
@@ -207,552 +128,236 @@ const FlowBuilder = ({
     try {
       setIsLoading(true);
       const token = localStorage.getItem("token");
-
       const url = editingFlow
-        ? `https://www.sushiluha.com/api/auto-reply/flows/${editingFlow._id}`
-        : "https://www.sushiluha.com/api/auto-reply/flows";
-
-      const method = editingFlow ? "PUT" : "POST";
-
+        ? `${API_BASE_URL}/api/auto-reply/flows/${editingFlow._id}`
+        : API_BASE_URL + "/api/auto-reply/flows";
       const response = await axios({
-        method,
+        method: editingFlow ? "PUT" : "POST",
         url,
         data: formData,
         headers: { Authorization: `Bearer ${token}` },
         withCredentials: true,
       });
-
       onSave(response.data);
       onClose();
-    } catch (error) {
-      console.error("Error saving flow:", error);
-      alert("Failed to save flow");
+    } catch (e) {
+      setError(e.response?.data?.error || "Failed to save flow.");
     } finally {
       setIsLoading(false);
     }
   };
 
-  const getStepIcon = (stepType) => {
-    switch (stepType) {
-      case "immediate_reply":
-        return "⚡";
-      case "delayed_reply":
-        return "⏰";
-      case "conditional_reply":
-        return "❓";
-      case "end":
-        return "🏁";
-      default:
-        return "📝";
-    }
-  };
-
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center z-50 p-4 pt-20">
-      <div className="premium-panel max-w-6xl w-full max-h-[85vh] overflow-y-auto mt-16 rounded-2xl scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
-        <div className="p-8">
-          {/* Header */}
-          <div className="flex justify-between items-center mb-8 pb-4 border-b border-white/10">
-            <h3 className="text-3xl font-black text-white">
-              {title || (editingFlow ? "Edit Flow" : "Create New Flow")}
-            </h3>
-            <button
-              onClick={onClose}
-              className="text-white/50 hover:text-white transition-colors text-2xl"
-            >
-              <FaTimes />
-            </button>
-          </div>
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto p-4 py-10"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
+          <motion.div
+            className="ss-card relative w-full max-w-5xl"
+            initial={{ scale: 0.96, y: 16 }}
+            animate={{ scale: 1, y: 0 }}
+            exit={{ scale: 0.96, opacity: 0 }}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between border-b p-5" style={{ borderColor: "var(--ss-border)" }}>
+              <h3 className="text-xl font-extrabold">{title || (editingFlow ? "Edit Flow" : "Create New Flow")}</h3>
+              <Button variant="ghost" className="!px-2.5" onClick={onClose}><FaTimes /></Button>
+            </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Left Column - Flow Settings */}
-            <div className="space-y-6">
-              {/* Basic Info */}
-              <div className="bg-white/5 border border-white/5 p-6 rounded-2xl">
-                <h4 className="text-xl font-bold text-white mb-6">
-                  Basic Information
-                </h4>
-                <div className="space-y-5">
-                  <div>
-                    <label className="block text-sm font-medium text-white/80 mb-2">
-                      Flow Name *
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.name}
-                      onChange={(e) =>
-                        handleInputChange("name", e.target.value)
-                      }
-                      className="w-full p-3 bg-white/5 border border-white/10 text-white placeholder-white/40 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
-                      placeholder="Enter flow name"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-white/80 mb-2">
-                      Description
-                    </label>
-                    <textarea
-                      value={formData.description}
-                      onChange={(e) =>
-                        handleInputChange("description", e.target.value)
-                      }
-                      className="w-full p-3 bg-white/5 border border-white/10 text-white placeholder-white/40 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
-                      rows="3"
-                      placeholder="Describe this flow"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-white/80 mb-2">
-                      Platform
-                    </label>
-                    <select
-                      value={formData.platform}
-                      onChange={(e) =>
-                        handleInputChange("platform", e.target.value)
-                      }
-                      className="w-full p-3 bg-white/5 border border-white/10 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 [&>option]:bg-slate-900"
-                    >
-                      <option value="All">All Platforms</option>
-                      <option value="Twitter">Twitter</option>
-                      <option value="Facebook">Facebook</option>
-                      <option value="LinkedIn">LinkedIn</option>
-                      <option value="Instagram">Instagram</option>
-                      <option value="Telegram">Telegram</option>
-                      <option value="WhatsApp">WhatsApp</option>
+            <div className="p-5 grid gap-5 lg:grid-cols-2">
+              {/* Left column */}
+              <div className="space-y-4">
+                <section className="rounded-xl border p-4" style={{ borderColor: "var(--ss-border)", background: "var(--ss-surface-2)" }}>
+                  <h4 className="font-bold mb-3">Basic information</h4>
+                  <Field label="Flow name" required>
+                    <input className="ss-input" value={formData.name} onChange={(e) => setField("name", e.target.value)} placeholder="Enter flow name" />
+                  </Field>
+                  <Field label="Description">
+                    <textarea className="ss-textarea" rows={2} value={formData.description} onChange={(e) => setField("description", e.target.value)} placeholder="Describe this flow" />
+                  </Field>
+                  <Field label="Platform">
+                    <select className="ss-select" value={formData.platform} onChange={(e) => setField("platform", e.target.value)}>
+                      {["All", "Facebook", "Instagram", "WhatsApp", "Telegram", "TikTok", "Twitter", "LinkedIn"].map((p) => (
+                        <option key={p} value={p}>{p === "All" ? "All Platforms" : p}</option>
+                      ))}
                     </select>
-                  </div>
-                </div>
-              </div>
+                  </Field>
+                </section>
 
-              {/* Trigger Keywords */}
-              <div className="bg-white/5 border border-white/5 p-6 rounded-2xl">
-                <h4 className="text-xl font-bold text-white mb-6">
-                  Trigger Keywords
-                </h4>
-                <div className="space-y-3">
-                  <div className="flex gap-3">
+                <section className="rounded-xl border p-4" style={{ borderColor: "var(--ss-border)", background: "var(--ss-surface-2)" }}>
+                  <h4 className="font-bold mb-3">Trigger keywords</h4>
+                  <div className="flex gap-2">
                     <input
-                      type="text"
+                      className="ss-input"
                       value={newKeyword}
                       onChange={(e) => setNewKeyword(e.target.value)}
-                      onKeyPress={(e) =>
-                        e.key === "Enter" && handleAddKeyword()
-                      }
-                      className="flex-1 p-3 bg-white/5 border border-white/10 text-white placeholder-white/40 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
-                      placeholder="Add keyword"
+                      onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addKeyword())}
+                      placeholder="Add keyword and press Enter"
                     />
-                    <button
-                      onClick={handleAddKeyword}
-                      className="px-6 py-3 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition-colors shadow-lg"
-                    >
-                      <FaPlus />
-                    </button>
+                    <Button type="button" onClick={addKeyword} className="!px-3"><FaPlus /></Button>
                   </div>
-                  <div className="flex flex-wrap gap-2 mt-4">
-                    {formData.triggerKeywords.map((keyword, index) => (
-                      <span
-                        key={index}
-                        className="px-4 py-2 bg-purple-500/20 border border-purple-500/30 text-purple-200 text-sm font-bold rounded-full flex items-center gap-2"
-                      >
-                        {keyword}
-                        <button
-                          onClick={() => handleRemoveKeyword(keyword)}
-                          className="text-purple-400 hover:text-white transition-colors"
-                        >
-                          <FaTimes />
-                        </button>
+                  <div className="flex flex-wrap gap-2 mt-3">
+                    {formData.triggerKeywords.map((k, i) => (
+                      <span key={i} className="ss-badge ss-badge-accent">
+                        {k}
+                        <button onClick={() => removeKeyword(k)} className="ml-1" aria-label={`Remove ${k}`}><FaTimes /></button>
                       </span>
                     ))}
                   </div>
-                </div>
-              </div>
+                </section>
 
-              {/* Settings */}
-              <div className="bg-white/5 border border-white/5 p-6 rounded-2xl">
-                <h4 className="text-xl font-bold text-white mb-6">
-                  Settings
-                </h4>
-                <div className="space-y-5">
-                  <div>
-                    <label className="block text-sm font-medium text-white/80 mb-2">
-                      Max Replies Per User
-                    </label>
-                    <input
-                      type="number"
-                      value={formData.settings.maxRepliesPerUser}
-                      onChange={(e) =>
-                        handleNestedInputChange(
-                          "settings",
-                          "maxRepliesPerUser",
-                          parseInt(e.target.value)
-                        )
-                      }
-                      className="w-full p-3 bg-white/5 border border-white/10 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
-                      min="1"
-                      max="10"
-                    />
+                <section className="rounded-xl border p-4" style={{ borderColor: "var(--ss-border)", background: "var(--ss-surface-2)" }}>
+                  <h4 className="font-bold mb-3">Settings</h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    <Field label="Max replies / user">
+                      <input type="number" min="1" max="10" className="ss-input" value={formData.settings.maxRepliesPerUser}
+                        onChange={(e) => setNested("settings", "maxRepliesPerUser", parseInt(e.target.value) || 1)} />
+                    </Field>
+                    <Field label="Cooldown (hours)">
+                      <input type="number" min="1" max="168" className="ss-input" value={formData.settings.cooldownPeriod}
+                        onChange={(e) => setNested("settings", "cooldownPeriod", parseInt(e.target.value) || 1)} />
+                    </Field>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-white/80 mb-2">
-                      Cooldown Period (hours)
-                    </label>
-                    <input
-                      type="number"
-                      value={formData.settings.cooldownPeriod}
-                      onChange={(e) =>
-                        handleNestedInputChange(
-                          "settings",
-                          "cooldownPeriod",
-                          parseInt(e.target.value)
-                        )
-                      }
-                      className="w-full p-3 bg-white/5 border border-white/10 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
-                      min="1"
-                      max="168"
-                    />
-                  </div>
-                </div>
-              </div>
+                </section>
 
-              {/* Catalog Offer */}
-              <div className="bg-white/5 border border-white/5 p-6 rounded-2xl">
-                <div className="flex items-center gap-3 mb-6">
-                  <FaShoppingBag className="text-teal-300 text-xl" />
-                  <h4 className="text-xl font-bold text-white">
-                    Catalog Offer
-                  </h4>
-                </div>
-                <div className="space-y-5">
-                  <label className="flex items-center gap-3 bg-white/5 p-4 border border-white/10 rounded-xl cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={formData.settings.catalog.enabled}
-                      onChange={(e) =>
-                        handleCatalogSettingChange("enabled", e.target.checked)
-                      }
-                      className="w-5 h-5 rounded border-gray-300 text-teal-500 focus:ring-teal-400"
-                    />
-                    <span className="text-sm font-bold text-white">
-                      Ask for catalog at the end of this flow
-                    </span>
+                <section className="rounded-xl border p-4" style={{ borderColor: "var(--ss-border)", background: "var(--ss-surface-2)" }}>
+                  <div className="flex items-center gap-2 mb-3">
+                    <FaShoppingBag style={{ color: "var(--ss-accent)" }} />
+                    <h4 className="font-bold">Catalog offer</h4>
+                  </div>
+                  <label className="flex items-center gap-2 text-sm font-medium mb-3">
+                    <input type="checkbox" checked={formData.settings.catalog.enabled} onChange={(e) => setCatalog("enabled", e.target.checked)} className="h-4 w-4" />
+                    Ask for catalog at the end of this flow
                   </label>
-
                   {formData.settings.catalog.enabled && (
                     <>
-                      <div>
-                        <label className="block text-sm font-medium text-white/80 mb-2">
-                          End Message
-                        </label>
-                        <textarea
-                          value={formData.settings.catalog.prompt}
-                          onChange={(e) =>
-                            handleCatalogSettingChange("prompt", e.target.value)
-                          }
-                          className="w-full p-3 bg-white/5 border border-white/10 text-white placeholder-white/40 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-400"
-                          rows="3"
-                          placeholder="إذا بتحب تشوف الكتالوج اكتب كتالوج أو منتجات."
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-white/80 mb-2">
-                          Catalog Trigger Words
-                        </label>
-                        <input
-                          type="text"
-                          value={formData.settings.catalog.triggerKeywords.join(", ")}
-                          onChange={(e) =>
-                            handleCatalogSettingChange(
-                              "triggerKeywords",
-                              e.target.value
-                                .split(",")
-                                .map((word) => word.trim())
-                                .filter(Boolean)
-                            )
-                          }
-                          className="w-full p-3 bg-white/5 border border-white/10 text-white placeholder-white/40 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-400"
-                          placeholder="كتالوج, منتجات, catalog"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-white/80 mb-2">
-                          Max Products To Send
-                        </label>
-                        <input
-                          type="number"
-                          value={formData.settings.catalog.maxProducts}
-                          onChange={(e) =>
-                            handleCatalogSettingChange(
-                              "maxProducts",
-                              Math.max(1, parseInt(e.target.value) || 1)
-                            )
-                          }
-                          className="w-full p-3 bg-white/5 border border-white/10 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-400"
-                          min="1"
-                          max="20"
-                        />
-                      </div>
+                      <Field label="End message">
+                        <textarea className="ss-textarea" rows={2} value={formData.settings.catalog.prompt} onChange={(e) => setCatalog("prompt", e.target.value)} />
+                      </Field>
+                      <Field label="Catalog trigger words (comma-separated)">
+                        <input className="ss-input" value={formData.settings.catalog.triggerKeywords.join(", ")}
+                          onChange={(e) => setCatalog("triggerKeywords", e.target.value.split(",").map((w) => w.trim()).filter(Boolean))} />
+                      </Field>
+                      <Field label="Max products to send">
+                        <input type="number" min="1" max="20" className="ss-input" value={formData.settings.catalog.maxProducts}
+                          onChange={(e) => setCatalog("maxProducts", Math.max(1, parseInt(e.target.value) || 1))} />
+                      </Field>
                     </>
                   )}
-                </div>
-              </div>
-            </div>
-
-            {/* Right Column - Flow Steps */}
-            <div className="space-y-4">
-              <div className="flex justify-between items-center mb-2">
-                <h4 className="text-xl font-bold text-white">
-                  Flow Steps
-                </h4>
-                <button
-                  onClick={handleAddStep}
-                  className="px-5 py-2.5 bg-green-500/20 text-green-400 border border-green-500/30 rounded-xl hover:bg-green-500 hover:text-white transition-all shadow-lg flex items-center gap-2 font-bold"
-                >
-                  <FaPlus />
-                  Add Step
-                </button>
+                </section>
               </div>
 
-              {formData.flowSteps.length === 0 ? (
-                <div className="text-center py-16 bg-white/5 border border-white/10 rounded-2xl">
-                  <p className="text-white/60">No steps added yet. Click "Add Step" to get started.</p>
+              {/* Right column - steps */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-bold">Flow steps</h4>
+                  <Button type="button" variant="secondary" onClick={addStep}><FaPlus /> Add step</Button>
                 </div>
-              ) : (
-                <div className="space-y-4">
-                  {formData.flowSteps.map((step, index) => (
-                    <div
-                      key={index}
-                      className="bg-white/5 border border-white/10 rounded-2xl p-6"
-                    >
-                      <div className="flex justify-between items-start mb-5">
-                        <div className="flex items-center gap-3">
-                          <span className="text-3xl">
-                            {getStepIcon(step.stepType)}
-                          </span>
-                          <span className="text-xl font-bold text-white">
-                            Step {step.stepNumber}
-                          </span>
+
+                {formData.flowSteps.length === 0 ? (
+                  <div className="rounded-xl border border-dashed p-10 text-center text-sm" style={{ borderColor: "var(--ss-border)", color: "var(--ss-text-muted)" }}>
+                    No steps yet. Click “Add step” to get started.
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {formData.flowSteps.map((step, index) => (
+                      <motion.div key={index} layout className="rounded-xl border p-4" style={{ borderColor: "var(--ss-border)" }}>
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xl">{STEP_ICON[step.stepType] || "📝"}</span>
+                            <span className="font-bold">Step {step.stepNumber}</span>
+                          </div>
+                          <Button variant="ghost" className="!px-2.5 !text-red-500" onClick={() => removeStep(index)}><FaTrash /></Button>
                         </div>
-                        <button
-                          onClick={() => handleRemoveStep(index)}
-                          className="text-red-400 hover:text-white bg-red-500/10 hover:bg-red-500 p-2 rounded-lg transition-all"
-                        >
-                          <FaTrash />
-                        </button>
-                      </div>
 
-                      <div className="space-y-5">
-                        <div>
-                          <label className="block text-sm font-medium text-white/80 mb-2">
-                            Step Type
-                          </label>
-                          <select
-                            value={step.stepType}
-                            onChange={(e) =>
-                              handleUpdateStep(
-                                index,
-                                "stepType",
-                                e.target.value
-                              )
-                            }
-                            className="w-full p-3 bg-white/5 border border-white/10 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 [&>option]:bg-slate-900"
-                          >
-                            <option value="immediate_reply">
-                              Immediate Reply
-                            </option>
-                            <option value="delayed_reply">Delayed Reply</option>
-                            <option value="conditional_reply">
-                              Conditional Reply
-                            </option>
-                            <option value="end">End Flow</option>
+                        <Field label="Step type">
+                          <select className="ss-select" value={step.stepType} onChange={(e) => updateStep(index, "stepType", e.target.value)}>
+                            <option value="immediate_reply">Immediate reply</option>
+                            <option value="delayed_reply">Delayed reply</option>
+                            <option value="conditional_reply">Conditional reply</option>
+                            <option value="ai_reply">AI reply</option>
+                            <option value="end">End flow</option>
                           </select>
-                        </div>
+                        </Field>
 
                         {step.stepType === "delayed_reply" && (
-                          <div>
-                            <label className="block text-sm font-medium text-white/80 mb-2">
-                              Delay (minutes)
-                            </label>
-                            <input
-                              type="number"
-                              value={step.delay}
-                              onChange={(e) =>
-                                handleUpdateStep(
-                                  index,
-                                  "delay",
-                                  parseInt(e.target.value)
-                                )
-                              }
-                              className="w-full p-3 bg-white/5 border border-white/10 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
-                              min="0"
-                            />
-                          </div>
+                          <Field label="Delay (minutes)">
+                            <input type="number" min="0" className="ss-input" value={step.delay} onChange={(e) => updateStep(index, "delay", parseInt(e.target.value) || 0)} />
+                          </Field>
                         )}
 
                         {step.stepType === "conditional_reply" && (
-                          <div>
-                            <label className="block text-sm font-medium text-white/80 mb-2">
-                              Condition
-                            </label>
-                            <select
-                              value={step.condition}
-                              onChange={(e) =>
-                                handleUpdateStep(
-                                  index,
-                                  "condition",
-                                  e.target.value
-                                )
-                              }
-                              className="w-full p-3 bg-white/5 border border-white/10 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 [&>option]:bg-slate-900"
-                            >
+                          <Field label="Condition">
+                            <select className="ss-select" value={step.condition} onChange={(e) => updateStep(index, "condition", e.target.value)}>
                               <option value="always">Always</option>
-                              <option value="contains_keyword">
-                                Contains Keyword
-                              </option>
-                              <option value="time_based">Time Based</option>
-                              <option value="sender_based">Sender Based</option>
+                              <option value="contains_keyword">Contains keyword</option>
+                              <option value="time_based">Time based</option>
+                              <option value="sender_based">Sender based</option>
                             </select>
                             {step.condition !== "always" && (
-                              <input
-                                type="text"
-                                value={step.conditionValue}
-                                onChange={(e) =>
-                                  handleUpdateStep(
-                                    index,
-                                    "conditionValue",
-                                    e.target.value
-                                  )
-                                }
-                                className="w-full p-3 bg-white/5 border border-white/10 text-white placeholder-white/40 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 mt-3"
-                                placeholder="Condition value"
-                              />
+                              <input className="ss-input mt-2" value={step.conditionValue} onChange={(e) => updateStep(index, "conditionValue", e.target.value)} placeholder="Condition value" />
                             )}
-                          </div>
+                          </Field>
                         )}
 
-                        <div>
-                          <label className="block text-sm font-medium text-white/80 mb-2">
-                            Reply Content *
-                          </label>
-                          <textarea
-                            value={step.replyContent}
-                            onChange={(e) =>
-                              handleUpdateStep(
-                                index,
-                                "replyContent",
-                                e.target.value
-                              )
-                            }
-                            className="w-full p-3 bg-white/5 border border-white/10 text-white placeholder-white/40 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
-                            rows="3"
-                            placeholder="Enter reply message"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium text-white/80 mb-2">
-                            Image URL (optional)
-                          </label>
-                          <input
-                            type="url"
-                            value={step.replyImage}
-                            onChange={(e) =>
-                              handleUpdateStep(
-                                index,
-                                "replyImage",
-                                e.target.value
-                              )
-                            }
-                            className="w-full p-3 bg-white/5 border border-white/10 text-white placeholder-white/40 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
-                            placeholder="https://example.com/image.jpg"
-                          />
-                        </div>
-
-                        {!step.isEndStep && (
-                          <div>
-                            <label className="block text-sm font-medium text-white/80 mb-2">
-                              Next Step
+                        {step.stepType === "ai_reply" ? (
+                          <>
+                            <div className="mb-2"><Badge variant="accent"><FaRobot /> AI generates the reply</Badge></div>
+                            <Field label="AI instructions (optional)">
+                              <textarea className="ss-textarea" rows={2} value={step.aiPrompt || ""} onChange={(e) => updateStep(index, "aiPrompt", e.target.value)} placeholder="e.g. Answer politely and suggest a product." />
+                            </Field>
+                            <label className="flex items-center gap-2 text-sm mb-3">
+                              <input type="checkbox" checked={!!step.aiIncludeProducts} onChange={(e) => updateStep(index, "aiIncludeProducts", e.target.checked)} className="h-4 w-4" />
+                              Give the AI access to the product catalog
                             </label>
-                            <input
-                              type="number"
-                              value={step.nextStep || ""}
-                              onChange={(e) =>
-                                handleUpdateStep(
-                                  index,
-                                  "nextStep",
-                                  e.target.value
-                                    ? parseInt(e.target.value)
-                                    : null
-                                )
-                              }
-                              className="w-full p-3 bg-white/5 border border-white/10 text-white placeholder-white/40 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
-                              placeholder="Step number"
-                            />
-                          </div>
+                          </>
+                        ) : step.stepType !== "end" ? (
+                          <Field label="Reply content" required>
+                            <textarea className="ss-textarea" rows={3} value={step.replyContent} onChange={(e) => updateStep(index, "replyContent", e.target.value)} placeholder="Enter reply message" />
+                          </Field>
+                        ) : null}
+
+                        {step.stepType !== "end" && (
+                          <Field label="Image URL (optional)">
+                            <input type="url" className="ss-input" value={step.replyImage} onChange={(e) => updateStep(index, "replyImage", e.target.value)} placeholder="https://example.com/image.jpg" />
+                          </Field>
                         )}
 
-                        <div className="flex items-center gap-3 bg-white/5 p-4 border border-white/10 rounded-xl">
-                          <input
-                            type="checkbox"
-                            id={`endStep-${index}`}
-                            checked={step.isEndStep}
-                            onChange={(e) =>
-                              handleUpdateStep(
-                                index,
-                                "isEndStep",
-                                e.target.checked
-                              )
-                            }
-                            className="w-5 h-5 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
-                          />
-                          <label
-                            htmlFor={`endStep-${index}`}
-                            className="text-sm font-bold text-white cursor-pointer"
-                          >
-                            This is the end step
-                          </label>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+                        {!step.isEndStep && step.stepType !== "end" && (
+                          <Field label="Next step (optional)">
+                            <input type="number" className="ss-input" value={step.nextStep || ""} onChange={(e) => updateStep(index, "nextStep", e.target.value ? parseInt(e.target.value) : null)} placeholder="Step number" />
+                          </Field>
+                        )}
+
+                        <label className="flex items-center gap-2 text-sm font-medium mt-1">
+                          <input type="checkbox" checked={step.isEndStep} onChange={(e) => updateStep(index, "isEndStep", e.target.checked)} className="h-4 w-4" />
+                          This is the end step
+                        </label>
+                      </motion.div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
 
-          {/* Footer */}
-          <div className="flex justify-end gap-4 mt-8 pt-6 border-t border-white/10">
-            <button
-              onClick={onClose}
-              className="px-8 py-3 bg-white/10 text-white rounded-xl hover:bg-white/20 transition-colors font-bold"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleSave}
-              disabled={isLoading}
-              className="px-8 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl hover:opacity-90 disabled:opacity-50 flex items-center gap-3 font-bold shadow-lg"
-            >
-              {isLoading ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <FaSave />
-                  {saveLabel || (editingFlow ? "Update Flow" : "Create Flow")}
-                </>
-              )}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+            {/* Footer */}
+            <div className="border-t p-5" style={{ borderColor: "var(--ss-border)" }}>
+              {error && <div className="ss-error mb-3">{error}</div>}
+              <div className="flex justify-end gap-2">
+                <Button variant="secondary" onClick={onClose}>Cancel</Button>
+                <Button onClick={handleSave} loading={isLoading}>
+                  <FaSave /> {saveLabel || (editingFlow ? "Update flow" : "Create flow")}
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
-};
-
-export default FlowBuilder;
+}

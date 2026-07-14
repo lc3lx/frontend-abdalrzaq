@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { API_BASE_URL } from "../../config";
 import {
   FaWhatsapp,
   FaCheck,
@@ -191,7 +192,7 @@ const WhatsAppQuickSetup = ({ onClose, onSuccess }) => {
                     type="url"
                     value={webhookUrl}
                     onChange={(e) => setWebhookUrl(e.target.value)}
-                    placeholder="https://yourdomain.com/api/whatsapp/webhook"
+                    placeholder={`${API_BASE_URL}/api/whatsapp/webhook`}
                     className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                   />
                   <p className="text-xs text-gray-500 mt-1">

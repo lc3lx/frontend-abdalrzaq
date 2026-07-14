@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { API_BASE_URL } from "../../config";
 import PropTypes from "prop-types";
 import {
   FaTimes,
@@ -52,7 +53,7 @@ const GiftModal = ({ isOpen, onClose, onGiftSuccess, wallet }) => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.post(
-        "https://www.sushiluha.com/api/wallet/gift",
+        API_BASE_URL + "/api/wallet/gift",
         {
           amount: parseFloat(amount),
           recipientEmail,

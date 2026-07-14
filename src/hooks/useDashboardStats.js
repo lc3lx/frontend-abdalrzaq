@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { API_BASE_URL } from "../config";
 import axios from "axios";
 
 export const useDashboardStats = () => {
@@ -25,7 +26,7 @@ export const useDashboardStats = () => {
       const token = localStorage.getItem("token");
 
       const response = await axios.get(
-        "https://www.sushiluha.com/api/dashboard/stats",
+        API_BASE_URL + "/api/dashboard/stats",
         {
           headers: { Authorization: `Bearer ${token}` },
           withCredentials: true,

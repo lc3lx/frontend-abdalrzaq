@@ -1,60 +1,53 @@
 import { useState, useEffect } from "react";
+import { API_BASE_URL } from "../config";
 import axios from "axios";
-import { motion } from "framer-motion";
-import FlowDiagram from "../components/AutoReply/FlowDiagram";
-import FlowBuilder from "../components/AutoReply/FlowBuilder";
-import SubscriptionCheck from "../components/SubscriptionCheck";
-import TelegramQuickConnect from "../components/Telegram/TelegramQuickConnect";
-import WhatsAppQuickConnect from "../components/WhatsApp/WhatsAppQuickConnect";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   FaPlay,
   FaPause,
   FaChartBar,
   FaRobot,
-  FaArrowRight,
-  FaProjectDiagram,
   FaMagic,
+  FaEdit,
+  FaTrash,
+  FaComments,
 } from "react-icons/fa";
+import FlowBuilder from "../components/AutoReply/FlowBuilder";
+import SubscriptionCheck from "../components/SubscriptionCheck";
+import TelegramQuickConnect from "../components/Telegram/TelegramQuickConnect";
+import WhatsAppQuickConnect from "../components/WhatsApp/WhatsAppQuickConnect";
+import {
+  PageHeader,
+  StatCard,
+  Card,
+  Button,
+  Badge,
+  Skeleton,
+  EmptyState,
+} from "../components/ui/kit";
 
-const AutoReplyPage = () => {
+export default function AutoReplyPage() {
   const [flows, setFlows] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingFlow, setEditingFlow] = useState(null);
-  const [windowSize, setWindowSize] = useState({ width: 1920, height: 1080 });
-
-  useEffect(() => {
-    const updateSize = () => {
-      setWindowSize({
-        width: window.innerWidth,
-        height: window.innerHeight,
-      });
-    };
-
-    updateSize();
-    window.addEventListener("resize", updateSize);
-    return () => window.removeEventListener("resize", updateSize);
-  }, []);
 
   useEffect(() => {
     fetchFlows();
   }, []);
 
+  const cfg = () => ({
+    headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+    withCredentials: true,
+  });
+
   const fetchFlows = async () => {
     try {
       setIsLoading(true);
-      const token = localStorage.getItem("token");
-      const response = await axios.get(
-        "https://www.sushiluha.com/api/auto-reply/flows",
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          withCredentials: true,
-        }
-      );
-      setFlows(response.data);
+      const { data } = await axios.get(API_BASE_URL + "/api/auto-reply/flows", cfg());
+      setFlows(data);
     } catch (error) {
       console.error("Error fetching flows:", error);
-      alert("Failed to fetch auto reply flows");
     } finally {
       setIsLoading(false);
     }
@@ -62,38 +55,20 @@ const AutoReplyPage = () => {
 
   const handleToggleFlow = async (flowId, isActive) => {
     try {
-      const token = localStorage.getItem("token");
-      await axios.patch(
-        `https://www.sushiluha.com/api/auto-reply/flows/${flowId}/toggle`,
-        { isActive },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          withCredentials: true,
-        }
-      );
+      await axios.patch(`${API_BASE_URL}/api/auto-reply/flows/${flowId}/toggle`, { isActive }, cfg());
       fetchFlows();
-    } catch (error) {
-      console.error("Error toggling flow:", error);
-      alert("Failed to toggle flow");
+    } catch (e) {
+      console.error("Error toggling flow:", e);
     }
   };
 
   const handleDeleteFlow = async (flowId) => {
     if (!window.confirm("Are you sure you want to delete this flow?")) return;
-
     try {
-      const token = localStorage.getItem("token");
-      await axios.delete(
-        `https://www.sushiluha.com/api/auto-reply/flows/${flowId}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          withCredentials: true,
-        }
-      );
+      await axios.delete(`${API_BASE_URL}/api/auto-reply/flows/${flowId}`, cfg());
       fetchFlows();
-    } catch (error) {
-      console.error("Error deleting flow:", error);
-      alert("Failed to delete flow");
+    } catch (e) {
+      console.error("Error deleting flow:", e);
     }
   };
 
@@ -108,263 +83,77 @@ const AutoReplyPage = () => {
   };
 
   const handleSaveFlow = (savedFlow) => {
-    if (editingFlow) {
-      // Update existing flow in the list
-      setFlows(
-        flows.map((flow) => (flow._id === savedFlow._id ? savedFlow : flow))
-      );
-    } else {
-      // Add new flow to the list
-      setFlows([savedFlow, ...flows]);
-    }
+    setFlows((prev) =>
+      editingFlow ? prev.map((f) => (f._id === savedFlow._id ? savedFlow : f)) : [savedFlow, ...prev]
+    );
   };
 
-  const activeFlows = flows.filter((flow) => flow.isActive);
-  const inactiveFlows = flows.filter((flow) => !flow.isActive);
+  const activeFlows = flows.filter((f) => f.isActive);
+  const totalReplies = flows.reduce((s, f) => s + (f.statistics?.totalReplies || 0), 0);
 
   return (
-    <div className="relative">
-      <div className="relative z-10 pt-8 pb-20">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="max-w-7xl mx-auto"
-        >
-          {/* Header */}
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="text-center mb-16"
-          >
-            <div className="w-24 h-24 bg-gradient-to-br from-teal-300 via-amber-300 to-rose-400 rounded-2xl flex items-center justify-center mx-auto mb-8 text-slate-950 shadow-glow">
-              <FaProjectDiagram className="text-4xl text-white" />
-            </div>
-            <h1 className="text-6xl lg:text-7xl font-black text-white mb-6">
-              Auto Reply Flows
-            </h1>
-            <p className="text-xl text-white/80 max-w-3xl mx-auto mb-8">
-              Create intelligent automated response flows that engage your
-              customers automatically
-            </p>
+    <div>
+      <PageHeader
+        title="Automation"
+        subtitle="Intelligent auto-reply flows that engage customers automatically"
+        actions={
+          <SubscriptionCheck serviceType="auto_reply">
+            <Button onClick={handleCreateFlow}>
+              <FaMagic /> New Flow
+            </Button>
+          </SubscriptionCheck>
+        }
+      />
 
-            {/* Create Flow Button */}
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="inline-block"
-            >
-              <SubscriptionCheck serviceType="auto_reply">
-                <button
-                  onClick={handleCreateFlow}
-                  className="premium-button text-lg"
-                >
-                  <FaMagic />
-                  Create New Flow
-                  <FaArrowRight />
-                </button>
-              </SubscriptionCheck>
-            </motion.div>
-          </motion.div>
-
-          {/* Quick Connections */}
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
-            className="grid md:grid-cols-2 gap-8 mb-16"
-          >
-            <div className="premium-panel rounded-2xl p-8">
-              <TelegramQuickConnect onTelegramConnected={fetchFlows} />
-            </div>
-            <div className="premium-panel rounded-2xl p-8">
-              <WhatsAppQuickConnect onWhatsAppConnected={fetchFlows} />
-            </div>
-          </motion.div>
-
-          {/* Statistics Cards */}
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8 }}
-            className="mb-16"
-          >
-            <h2 className="text-3xl font-bold text-white mb-8 text-center">
-              Your Flow Statistics
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-              <motion.div
-                whileHover={{ scale: 1.05, y: -5 }}
-                className="bg-gradient-to-br from-teal-400 to-cyan-600 p-8 rounded-2xl text-center shadow-2xl"
-              >
-                <FaRobot className="text-4xl text-white mx-auto mb-4" />
-                <div className="text-3xl font-black text-white mb-2">
-                  {flows.length}
-                </div>
-                <div className="text-white/90 font-medium">Total Flows</div>
-              </motion.div>
-
-              <motion.div
-                whileHover={{ scale: 1.05, y: -5 }}
-                className="bg-gradient-to-br from-emerald-400 to-teal-600 p-8 rounded-2xl text-center shadow-2xl"
-              >
-                <FaPlay className="text-4xl text-white mx-auto mb-4" />
-                <div className="text-3xl font-black text-white mb-2">
-                  {activeFlows.length}
-                </div>
-                <div className="text-white/90 font-medium">Active Flows</div>
-              </motion.div>
-
-              <motion.div
-                whileHover={{ scale: 1.05, y: -5 }}
-                className="bg-gradient-to-br from-amber-300 to-orange-500 p-8 rounded-2xl text-center shadow-2xl"
-              >
-                <FaPause className="text-4xl text-white mx-auto mb-4" />
-                <div className="text-3xl font-black text-white mb-2">
-                  {inactiveFlows.length}
-                </div>
-                <div className="text-white/90 font-medium">Inactive Flows</div>
-              </motion.div>
-
-              <motion.div
-                whileHover={{ scale: 1.05, y: -5 }}
-                className="bg-gradient-to-br from-rose-400 to-fuchsia-600 p-8 rounded-2xl text-center shadow-2xl"
-              >
-                <FaChartBar className="text-4xl text-white mx-auto mb-4" />
-                <div className="text-3xl font-black text-white mb-2">
-                  {flows.reduce(
-                    (sum, flow) => sum + (flow.statistics?.totalReplies || 0),
-                    0
-                  )}
-                </div>
-                <div className="text-white/90 font-medium">Total Replies</div>
-              </motion.div>
-            </div>
-          </motion.div>
-
-          {/* Active Flows */}
-          {activeFlows.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1 }}
-              className="mb-16"
-            >
-              <div className="flex items-center justify-center gap-4 mb-8">
-                <FaPlay className="text-green-400 text-2xl" />
-                <h3 className="text-3xl font-bold text-white">
-                  Active Flows ({activeFlows.length})
-                </h3>
-                <FaPlay className="text-green-400 text-2xl" />
-              </div>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {activeFlows.map((flow, index) => (
-                  <motion.div
-                    key={flow._id}
-                    initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                  >
-                    <FlowDiagram
-                      flow={flow}
-                      onEdit={handleEditFlow}
-                      onDelete={handleDeleteFlow}
-                      onToggle={handleToggleFlow}
-                    />
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
-          )}
-
-          {/* Inactive Flows */}
-          {inactiveFlows.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1.2 }}
-              className="mb-16"
-            >
-              <div className="flex items-center justify-center gap-4 mb-8">
-                <FaPause className="text-yellow-400 text-2xl" />
-                <h3 className="text-3xl font-bold text-white">
-                  Inactive Flows ({inactiveFlows.length})
-                </h3>
-                <FaPause className="text-yellow-400 text-2xl" />
-              </div>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {inactiveFlows.map((flow, index) => (
-                  <motion.div
-                    key={flow._id}
-                    initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                  >
-                    <FlowDiagram
-                      flow={flow}
-                      onEdit={handleEditFlow}
-                      onDelete={handleDeleteFlow}
-                      onToggle={handleToggleFlow}
-                    />
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
-          )}
-
-          {/* Empty State */}
-          {flows.length === 0 && !isLoading && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 1.4 }}
-              className="premium-panel rounded-2xl p-16 text-center"
-            >
-              <div className="w-24 h-24 bg-gradient-to-br from-teal-300 via-amber-300 to-rose-400 rounded-2xl flex items-center justify-center mx-auto mb-8 text-slate-950 shadow-glow">
-                <FaRobot className="text-4xl text-white" />
-              </div>
-              <h3 className="text-3xl font-bold text-white mb-4">
-                No Auto Reply Flows Yet
-              </h3>
-              <p className="text-white/80 text-lg mb-8 max-w-md mx-auto">
-                Create your first intelligent auto reply flow to start engaging
-                with your customers automatically
-              </p>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={handleCreateFlow}
-                className="premium-button text-lg"
-              >
-                <FaMagic />
-                Create Your First Flow
-                <FaArrowRight />
-              </motion.button>
-            </motion.div>
-          )}
-
-          {/* Loading State */}
-          {isLoading && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="flex justify-center items-center py-32"
-            >
-              <div className="flex flex-col items-center gap-4">
-                <div className="relative">
-                  <div className="animate-spin rounded-full h-16 w-16 border-4 border-white/20 border-t-teal-300"></div>
-                  <div className="absolute inset-0 rounded-full bg-gradient-to-r from-teal-300 to-amber-300 opacity-20"></div>
-                </div>
-                <p className="text-white/80 font-medium">
-                  Loading your flows...
-                </p>
-              </div>
-            </motion.div>
-          )}
-        </motion.div>
+      <div className="grid gap-4 grid-cols-2 lg:grid-cols-4 mb-6">
+        <StatCard icon={FaRobot} label="Total Flows" value={flows.length} />
+        <StatCard icon={FaPlay} label="Active" value={activeFlows.length} />
+        <StatCard icon={FaPause} label="Inactive" value={flows.length - activeFlows.length} />
+        <StatCard icon={FaChartBar} label="Total Replies" value={totalReplies} />
       </div>
-      {/* Flow Builder Modal */}
+
+      <div className="grid gap-4 md:grid-cols-2 mb-6">
+        <Card><TelegramQuickConnect onTelegramConnected={fetchFlows} /></Card>
+        <Card><WhatsAppQuickConnect onWhatsAppConnected={fetchFlows} /></Card>
+      </div>
+
+      {isLoading ? (
+        <div className="grid gap-4 lg:grid-cols-2">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Card key={i}>
+              <Skeleton style={{ width: "50%" }} />
+              <Skeleton style={{ width: "80%", marginTop: 10 }} />
+            </Card>
+          ))}
+        </div>
+      ) : flows.length === 0 ? (
+        <EmptyState
+          icon={FaRobot}
+          title="No automation flows yet"
+          description="Create your first flow to start replying to comments and messages automatically."
+          action={<Button onClick={handleCreateFlow}><FaMagic /> Create your first flow</Button>}
+        />
+      ) : (
+        <motion.div
+          className="grid gap-4 lg:grid-cols-2"
+          initial="hidden"
+          animate="show"
+          variants={{ show: { transition: { staggerChildren: 0.05 } } }}
+        >
+          <AnimatePresence>
+            {flows.map((flow) => (
+              <FlowCard
+                key={flow._id}
+                flow={flow}
+                onEdit={handleEditFlow}
+                onDelete={handleDeleteFlow}
+                onToggle={handleToggleFlow}
+              />
+            ))}
+          </AnimatePresence>
+        </motion.div>
+      )}
+
       <FlowBuilder
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
@@ -373,6 +162,55 @@ const AutoReplyPage = () => {
       />
     </div>
   );
-};
+}
 
-export default AutoReplyPage;
+function FlowCard({ flow, onEdit, onDelete, onToggle }) {
+  const keywords = flow.triggerKeywords || [];
+  const steps = flow.flowSteps?.length || 0;
+  return (
+    <motion.div
+      layout
+      variants={{ hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0 } }}
+      exit={{ opacity: 0, scale: 0.96 }}
+      className="ss-card ss-card-pad"
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <span className="flex h-11 w-11 flex-none items-center justify-center rounded-xl" style={{ background: "var(--ss-accent-soft)", color: "var(--ss-accent)" }}>
+            <FaComments />
+          </span>
+          <div className="min-w-0">
+            <h3 className="font-bold truncate">{flow.name || "Untitled flow"}</h3>
+            <div className="flex items-center gap-2 mt-0.5">
+              <Badge>{flow.platform || "All"}</Badge>
+              <Badge variant={flow.isActive ? "success" : "warning"}>
+                {flow.isActive ? "Active" : "Inactive"}
+              </Badge>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {keywords.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mt-3">
+          {keywords.slice(0, 6).map((k, i) => (
+            <Badge key={i} variant="accent">{k}</Badge>
+          ))}
+        </div>
+      )}
+
+      <div className="flex items-center gap-4 mt-3 text-sm" style={{ color: "var(--ss-text-muted)" }}>
+        <span>{steps} step{steps === 1 ? "" : "s"}</span>
+        <span>{flow.statistics?.totalReplies || 0} replies</span>
+      </div>
+
+      <div className="flex flex-wrap gap-2 mt-4">
+        <Button variant="secondary" onClick={() => onEdit(flow)}><FaEdit /> Edit</Button>
+        <Button variant="ghost" onClick={() => onToggle(flow._id, !flow.isActive)}>
+          {flow.isActive ? <><FaPause /> Pause</> : <><FaPlay /> Activate</>}
+        </Button>
+        <Button variant="ghost" className="!text-red-500" onClick={() => onDelete(flow._id)}><FaTrash /></Button>
+      </div>
+    </motion.div>
+  );
+}

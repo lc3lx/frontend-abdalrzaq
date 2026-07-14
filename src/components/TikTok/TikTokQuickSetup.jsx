@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { API_BASE_URL } from "../../config";
 import {
   FaTiktok,
   FaCheck,
@@ -19,7 +20,7 @@ const TikTokQuickSetup = ({ onClose, onSuccess }) => {
       const token = localStorage.getItem("token");
 
       const response = await axios.get(
-        "https://www.sushiluha.com/api/tiktok/auth",
+        API_BASE_URL + "/api/tiktok/auth",
         {
           headers: { Authorization: `Bearer ${token}` },
           withCredentials: true,
@@ -123,7 +124,7 @@ const TikTokQuickSetup = ({ onClose, onSuccess }) => {
                   <li>أنشئ تطبيق جديد</li>
                   <li>أضف TikTok for Business API</li>
                   <li>احصل على Client Key و Client Secret</li>
-                  <li>أضف Redirect URI: https://www.sushiluha.com/api/tiktok/callback</li>
+                  <li>أضف Redirect URI: {API_BASE_URL}/api/tiktok/callback</li>
                 </ol>
               </div>
 

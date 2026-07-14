@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { API_BASE_URL } from "../config";
 import axios from "axios";
 
 export const useSocialAccounts = () => {
@@ -9,7 +10,7 @@ export const useSocialAccounts = () => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.get(
-        "https://www.sushiluha.com/api/accounts",
+        API_BASE_URL + "/api/accounts",
         {
           headers: { Authorization: `Bearer ${token}` },
           withCredentials: true,
@@ -30,7 +31,7 @@ export const useSocialAccounts = () => {
       const endpoint = `/api/${platform.toLowerCase()}/auth`;
       setIsLoading(true);
 
-      const response = await axios.get(`https://www.sushiluha.com${endpoint}`, {
+      const response = await axios.get(`${API_BASE_URL}${endpoint}`, {
         headers: { Authorization: `Bearer ${token}` },
         withCredentials: true,
       });
@@ -74,7 +75,7 @@ export const useSocialAccounts = () => {
       const token = localStorage.getItem("token");
       setIsLoading(true);
 
-      await axios.delete(`https://www.sushiluha.com/api/accounts/${platform}`, {
+      await axios.delete(`${API_BASE_URL}/api/accounts/${platform}`, {
         headers: { Authorization: `Bearer ${token}` },
         withCredentials: true,
       });

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { API_BASE_URL } from "../config";
 import axios from "axios";
 
 export const usePosting = () => {
@@ -14,7 +15,7 @@ export const usePosting = () => {
 
       const token = localStorage.getItem("token");
       const response = await axios.post(
-        "https://www.sushiluha.com/api/post",
+        API_BASE_URL + "/api/post",
         postData,
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -55,7 +56,7 @@ export const usePosting = () => {
 
       const token = localStorage.getItem("token");
       const response = await axios.post(
-        "https://www.sushiluha.com/api/schedule-post",
+        API_BASE_URL + "/api/schedule-post",
         { ...postData, scheduledAt },
         {
           headers: { Authorization: `Bearer ${token}` },

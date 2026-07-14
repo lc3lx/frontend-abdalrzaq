@@ -1,12 +1,15 @@
-import { useState, useEffect } from "react";
-import { useSocialAccounts } from "../hooks/useSocialAccounts";
-import { usePosting } from "../hooks/usePosting";
-import useImageUpload from "../hooks/useImageUpload";
-import SubscriptionCheck from "../components/SubscriptionCheck";
-import FlowBuilder from "../components/AutoReply/FlowBuilder";
-import { motion } from "framer-motion";
-import { FaEdit, FaMagic, FaPlus, FaRobot, FaRocket, FaTrash } from "react-icons/fa";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
+  FaEdit,
+  FaMagic,
+  FaRobot,
+  FaRocket,
+  FaTrash,
+  FaCloudUploadAlt,
+  FaTimes,
+  FaCheckCircle,
+  FaExclamationTriangle,
   FaTwitter,
   FaFacebook,
   FaInstagram,
@@ -15,134 +18,105 @@ import {
   FaYoutube,
   FaWhatsapp,
 } from "react-icons/fa";
+import { useSocialAccounts } from "../hooks/useSocialAccounts";
+import { usePosting } from "../hooks/usePosting";
+import useImageUpload from "../hooks/useImageUpload";
+import SubscriptionCheck from "../components/SubscriptionCheck";
+import FlowBuilder from "../components/AutoReply/FlowBuilder";
+import { PageHeader, Card, Button, Badge, Field } from "../components/ui/kit";
 
-const CreatePostPage = () => {
+const PLATFORMS = [
+  { name: "Twitter", icon: FaTwitter, serviceType: "twitter" },
+  { name: "Facebook", icon: FaFacebook, serviceType: "facebook" },
+  { name: "Instagram", icon: FaInstagram, serviceType: "instagram" },
+  { name: "LinkedIn", icon: FaLinkedin, serviceType: "linkedin" },
+  { name: "TikTok", icon: FaTiktok, serviceType: "tiktok" },
+  { name: "YouTube", icon: FaYoutube, serviceType: "youtube" },
+  { name: "WhatsApp", icon: FaWhatsapp, serviceType: "whatsapp" },
+];
+
+const MAX_MEDIA = 20;
+
+export default function CreatePostPage() {
   const { connectedAccounts } = useSocialAccounts();
   const { isPosting, postingProgress, postToPlatforms } = usePosting();
-  const {
-    uploadMedia,
-    isUploading: isImageUploading,
-    uploadProgress: imageUploadProgress,
-  } = useImageUpload();
+  const { uploadMedia } = useImageUpload();
 
   const [postContent, setPostContent] = useState("");
-  const [imageUrl, setImageUrl] = useState(null);
-  const [imageFile, setImageFile] = useState(null);
+  // media = [{ url, type: 'image'|'video', name, size, mime, previewUrl }]
+  const [media, setMedia] = useState([]);
+  const [uploadingCount, setUploadingCount] = useState(0);
   const [selectedPlatforms, setSelectedPlatforms] = useState([]);
   const [whatsappTo, setWhatsappTo] = useState("");
   const [attachReplyFlow, setAttachReplyFlow] = useState(false);
   const [postReplyFlow, setPostReplyFlow] = useState(null);
   const [showFlowBuilder, setShowFlowBuilder] = useState(false);
   const [flowBuilderDraft, setFlowBuilderDraft] = useState(null);
-  const [windowSize, setWindowSize] = useState({ width: 1920, height: 1080 });
+  const [formError, setFormError] = useState("");
+  const [result, setResult] = useState(null);
 
-  useEffect(() => {
-    const updateSize = () => {
-      setWindowSize({
-        width: window.innerWidth,
-        height: window.innerHeight,
-      });
-    };
-
-    updateSize();
-    window.addEventListener("resize", updateSize);
-    return () => window.removeEventListener("resize", updateSize);
-  }, []);
-
-  const platforms = [
-    {
-      name: "Twitter",
-      icon: FaTwitter,
-      color: "text-blue-400",
-      serviceType: "twitter",
-    },
-    {
-      name: "Facebook",
-      icon: FaFacebook,
-      color: "text-blue-600",
-      serviceType: "facebook",
-    },
-    {
-      name: "Instagram",
-      icon: FaInstagram,
-      color: "text-pink-500",
-      serviceType: "instagram",
-    },
-    {
-      name: "LinkedIn",
-      icon: FaLinkedin,
-      color: "text-blue-700",
-      serviceType: "linkedin",
-    },
-    {
-      name: "TikTok",
-      icon: FaTiktok,
-      color: "text-black",
-      serviceType: "tiktok",
-    },
-    {
-      name: "YouTube",
-      icon: FaYoutube,
-      color: "text-red-600",
-      serviceType: "youtube",
-    },
-    {
-      name: "WhatsApp",
-      icon: FaWhatsapp,
-      color: "text-green-500",
-      serviceType: "whatsapp",
-    },
-  ];
+  const imagesCount = media.filter((m) => m.type === "image").length;
+  const videosCount = media.filter((m) => m.type === "video").length;
 
   const handleFileUpload = async (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      try {
-        // Show preview immediately
-        const previewUrl = URL.createObjectURL(file);
-        setImageUrl(previewUrl);
-        setImageFile(file);
+    const files = Array.from(e.target.files || []);
+    e.target.value = ""; // allow re-selecting the same file
+    if (!files.length) return;
+    setFormError("");
 
-        // Upload to server
-        const result = await uploadMedia(file);
-        setImageUrl(result.mediaUrl); // Replace preview with server URL
-      } catch (error) {
-        console.error("Upload error:", error);
-        alert(`خطأ في رفع الصورة: ${error.message}`);
-        setImageUrl(null);
-        setImageFile(null);
+    const room = MAX_MEDIA - media.length;
+    if (room <= 0) {
+      setFormError(`You can attach up to ${MAX_MEDIA} files.`);
+      return;
+    }
+    const toUpload = files.slice(0, room);
+    if (files.length > room) {
+      setFormError(`Only the first ${room} file(s) were added (max ${MAX_MEDIA}).`);
+    }
+
+    setUploadingCount((c) => c + toUpload.length);
+    // Upload sequentially so progress stays sane and order is preserved.
+    for (const file of toUpload) {
+      try {
+        const res = await uploadMedia(file);
+        setMedia((prev) => [
+          ...prev,
+          {
+            url: res.mediaUrl,
+            type: res.type || (file.type.startsWith("video/") ? "video" : "image"),
+            name: file.name,
+            size: file.size,
+            mime: file.type,
+            previewUrl: URL.createObjectURL(file),
+          },
+        ]);
+      } catch (err) {
+        setFormError(`"${file.name}": ${err.message}`);
+      } finally {
+        setUploadingCount((c) => Math.max(0, c - 1));
       }
     }
   };
 
-  const handlePlatformToggle = (platform) => {
+  const removeMedia = (index) =>
+    setMedia((prev) => prev.filter((_, i) => i !== index));
+
+  const togglePlatform = (name) =>
     setSelectedPlatforms((prev) =>
-      prev.includes(platform)
-        ? prev.filter((p) => p !== platform)
-        : [...prev, platform]
+      prev.includes(name) ? prev.filter((p) => p !== name) : [...prev, name]
     );
-  };
 
   const handleSelectAll = () => {
-    const connectedPlatforms = connectedAccounts.map((acc) => acc.platform);
-    if (selectedPlatforms.length === connectedPlatforms.length) {
-      setSelectedPlatforms([]);
-    } else {
-      setSelectedPlatforms(connectedPlatforms);
-    }
+    const connected = connectedAccounts.map((a) => a.platform);
+    setSelectedPlatforms(selectedPlatforms.length === connected.length ? [] : connected);
   };
 
   const getDefaultPostReplyFlow = () => ({
-    name: postContent
-      ? `Replies for ${postContent.slice(0, 42)}`
-      : "Post reply flow",
+    name: postContent ? `Replies for ${postContent.slice(0, 42)}` : "Post reply flow",
     description: "Auto replies for comments on this post.",
     platform: selectedPlatforms.length === 1 ? selectedPlatforms[0] : "All",
     triggerKeywords: [],
-    triggerConditions: {
-      type: "keyword",
-      value: "",
-    },
+    triggerConditions: { type: "keyword", value: "" },
     flowSteps: [
       {
         stepNumber: 1,
@@ -159,12 +133,7 @@ const CreatePostPage = () => {
     settings: {
       maxRepliesPerUser: 3,
       cooldownPeriod: 24,
-      workingHours: {
-        enabled: false,
-        startTime: "09:00",
-        endTime: "17:00",
-        timezone: "UTC",
-      },
+      workingHours: { enabled: false, startTime: "09:00", endTime: "17:00", timezone: "UTC" },
       catalog: {
         enabled: true,
         prompt: "إذا بتحب تشوف الكتالوج اكتب كتالوج أو منتجات.",
@@ -180,416 +149,287 @@ const CreatePostPage = () => {
   };
 
   const handleSavePostReplyFlow = (flow) => {
-    setPostReplyFlow({
-      ...flow,
-      platform: selectedPlatforms.length === 1 ? selectedPlatforms[0] : "All",
-    });
+    setPostReplyFlow({ ...flow, platform: selectedPlatforms.length === 1 ? selectedPlatforms[0] : "All" });
     setAttachReplyFlow(true);
-  };
-
-  const handleRemovePostReplyFlow = () => {
-    setPostReplyFlow(null);
-    setAttachReplyFlow(false);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setFormError("");
+    setResult(null);
 
-    if (!postContent) {
-      alert("Please write your post content.");
-      return;
-    }
+    if (!postContent) return setFormError("Please write your post content.");
+    if (selectedPlatforms.length === 0) return setFormError("Please select at least one platform.");
+    if (uploadingCount > 0) return setFormError("Please wait for uploads to finish.");
+    if (selectedPlatforms.includes("WhatsApp") && !whatsappTo.trim())
+      return setFormError("Please enter the WhatsApp recipient phone number.");
+    if (attachReplyFlow && !postReplyFlow)
+      return setFormError("Please build the reply flow or turn it off before posting.");
 
-    if (selectedPlatforms.length === 0) {
-      alert("Please select at least one platform.");
-      return;
-    }
-
-    if (selectedPlatforms.includes("WhatsApp") && !whatsappTo.trim()) {
-      alert("Please enter the WhatsApp recipient phone number.");
-      return;
-    }
-
-    if (attachReplyFlow && !postReplyFlow) {
-      alert("Please build the reply flow or turn it off before posting.");
-      return;
-    }
+    const images = media.filter((m) => m.type === "image").map((m) => m.url);
+    const videos = media.filter((m) => m.type === "video").map((m) => m.url);
+    const mediaMeta = media.map((m) => ({ kind: m.type, size: m.size, mime: m.mime }));
 
     try {
       const postData = {
         content: postContent,
         platforms: selectedPlatforms,
-        imageUrl,
+        images,
+        videos,
+        // Legacy single fields for backward compatibility.
+        imageUrl: images[0] || null,
+        videoUrl: videos[0] || null,
+        mediaMeta,
         whatsappTo: whatsappTo.trim() || undefined,
         autoReplyFlow:
           attachReplyFlow && postReplyFlow
-            ? {
-                ...postReplyFlow,
-                platform:
-                  selectedPlatforms.length === 1 ? selectedPlatforms[0] : "All",
-              }
+            ? { ...postReplyFlow, platform: selectedPlatforms.length === 1 ? selectedPlatforms[0] : "All" }
             : undefined,
       };
-
-      const result = await postToPlatforms(postData);
-
-      if (result.success.length) {
-        alert(
-          `✅ Successfully posted to ${
-            result.success.length
-          } platform(s):\n\n${result.success.join("\n")}`
-        );
+      const res = await postToPlatforms(postData);
+      setResult(res);
+      if (res.errors.length === 0) {
+        setPostContent("");
+        setMedia([]);
+        setWhatsappTo("");
+        setSelectedPlatforms([]);
+        setAttachReplyFlow(false);
+        setPostReplyFlow(null);
       }
-
-      if (result.errors.length) {
-        alert(
-          `❌ Failed to post to ${
-            result.errors.length
-          } platform(s):\n\n${result.errors.join("\n")}`
-        );
-      }
-
-      // Reset form
-      setPostContent("");
-      setImageUrl(null);
-      setWhatsappTo("");
-      setSelectedPlatforms([]);
-      setAttachReplyFlow(false);
-      setPostReplyFlow(null);
     } catch (error) {
-      const msg = error.response?.data?.message || error.response?.data?.error || error.message || "Unknown error";
-      alert(`Error: ${msg}`);
+      setFormError(error.response?.data?.error || error.message || "Something went wrong.");
     }
   };
 
+  const isConnected = (name) => connectedAccounts.some((a) => a.platform === name);
+
   return (
-    <div className="relative">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        className="max-w-4xl mx-auto"
-      >
-          {/* Header */}
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="text-center mb-12"
-          >
-            <div className="w-20 h-20 bg-gradient-to-br from-teal-300 via-amber-300 to-rose-400 rounded-2xl flex items-center justify-center mx-auto mb-6 text-slate-950 shadow-glow">
-              <FaPlus className="text-3xl text-white" />
-            </div>
-            <h1 className="text-5xl lg:text-6xl font-black text-white mb-4">
-              Create New Post
-            </h1>
-            <p className="text-xl text-white/80">
-              Share your content across multiple platforms with one click
-            </p>
+    <div className="max-w-4xl mx-auto">
+      <PageHeader title="Create Post" subtitle="Publish across your connected platforms at once" />
+
+      <AnimatePresence>
+        {result && (
+          <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="mb-4 space-y-2">
+            {result.success?.length > 0 && (
+              <div className="ss-card ss-card-pad flex items-start gap-3" style={{ borderColor: "var(--ss-success)" }}>
+                <FaCheckCircle style={{ color: "var(--ss-success)" }} className="mt-0.5" />
+                <div>
+                  <p className="font-semibold">Posted to {result.success.length} platform(s)</p>
+                  <p className="text-sm" style={{ color: "var(--ss-text-muted)" }}>{result.success.join(", ")}</p>
+                </div>
+              </div>
+            )}
+            {result.errors?.length > 0 && (
+              <div className="ss-card ss-card-pad flex items-start gap-3" style={{ borderColor: "var(--ss-danger)" }}>
+                <FaExclamationTriangle style={{ color: "var(--ss-danger)" }} className="mt-0.5" />
+                <div>
+                  <p className="font-semibold">Failed on {result.errors.length} platform(s)</p>
+                  <p className="text-sm" style={{ color: "var(--ss-text-muted)" }}>{result.errors.join(" · ")}</p>
+                </div>
+              </div>
+            )}
           </motion.div>
+        )}
+      </AnimatePresence>
 
-          {/* Form Card */}
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
-            className="premium-panel rounded-2xl p-8 lg:p-12"
-          >
-            <form onSubmit={handleSubmit}>
-              {/* Post Content */}
-              <div className="mb-8">
-                <label className="block text-lg font-semibold text-white mb-4">
-                  Post Content
-                </label>
-                <textarea
-                  className="premium-input min-h-40 resize-none p-6"
-                  rows="5"
-                  placeholder="Write your amazing post content here..."
-                  value={postContent}
-                  onChange={(e) => setPostContent(e.target.value)}
-                  required
-                />
-              </div>
+      <form onSubmit={handleSubmit}>
+        <Card className="mb-4">
+          <Field label="Post content" required>
+            <textarea
+              className="ss-textarea"
+              rows={5}
+              placeholder="Write your post…"
+              value={postContent}
+              onChange={(e) => setPostContent(e.target.value)}
+            />
+          </Field>
 
-              {/* Image/Video Upload */}
-              <div className="mb-8">
-                <label className="block text-lg font-semibold text-white mb-4">
-                  Media (Optional)
-                </label>
-                <div className="rounded-xl border-2 border-dashed border-white/20 bg-white/[0.05] p-8 text-center transition-all duration-300 hover:border-teal-300/60">
-                  <input
-                    type="file"
-                    accept="image/*,video/*"
-                    onChange={handleFileUpload}
-                    className="hidden"
-                    id="media-upload"
-                  />
-                  <label
-                    htmlFor="media-upload"
-                    className="cursor-pointer flex flex-col items-center"
-                  >
-                    <svg
-                      className="w-16 h-16 text-white/60 mb-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={1.5}
-                        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                      />
-                    </svg>
-                    <p className="text-lg text-white/80 mb-2 font-medium">
-                      Click to upload image or video
-                    </p>
-                    <p className="text-sm text-white/60">
-                      PNG, JPG, MP4, MOV up to 50MB
-                    </p>
-                  </label>
+          <Field label={`Media — images & videos (up to ${MAX_MEDIA})`}>
+            <label
+              className="flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed p-8 text-center transition-colors"
+              style={{ borderColor: "var(--ss-border)", background: "var(--ss-surface-2)" }}
+            >
+              <FaCloudUploadAlt className="mb-2 text-3xl" style={{ color: "var(--ss-text-faint)" }} />
+              <span className="font-semibold text-sm">Click to upload images or videos</span>
+              <span className="text-xs mt-0.5" style={{ color: "var(--ss-text-muted)" }}>
+                You can select multiple files · PNG, JPG, MP4, MOV up to 50MB each
+              </span>
+              <input type="file" accept="image/*,video/*" multiple onChange={handleFileUpload} className="hidden" />
+            </label>
+
+            {(media.length > 0 || uploadingCount > 0) && (
+              <div className="mt-3">
+                <div className="flex items-center gap-2 mb-2 text-sm" style={{ color: "var(--ss-text-muted)" }}>
+                  <Badge variant="accent">{imagesCount} image{imagesCount === 1 ? "" : "s"}</Badge>
+                  <Badge variant="accent">{videosCount} video{videosCount === 1 ? "" : "s"}</Badge>
+                  {uploadingCount > 0 && <span>Uploading {uploadingCount}…</span>}
                 </div>
-                {imageUrl && (
-                  <div className="mt-4">
-                    <div className="relative">
-                      <img
-                        src={imageUrl}
-                        alt="Uploaded media"
-                        className="max-w-sm rounded-lg shadow-md"
-                      />
-                      {isImageUploading && (
-                        <div className="absolute inset-0 bg-black bg-opacity-50 rounded-lg flex items-center justify-center">
-                          <div className="text-white text-center">
-                            <div className="text-sm mb-2">جاري الرفع...</div>
-                            <div className="w-32 bg-gray-300 rounded-full h-2">
-                              <div
-                                className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                                style={{ width: `${imageUploadProgress}%` }}
-                              ></div>
-                            </div>
-                            <div className="text-xs mt-1">
-                              {imageUploadProgress}%
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setImageUrl(null);
-                        setImageFile(null);
-                      }}
-                      className="mt-2 text-red-600 text-sm hover:text-red-800"
-                      disabled={isImageUploading}
-                    >
-                      Remove
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* Platform Selection */}
-              <div className="mb-8">
-                <label className="block text-lg font-semibold text-white mb-6">
-                  Select Platforms
-                </label>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {platforms.map(({ name, icon: Icon, color, serviceType }) => {
-                    const isConnected = connectedAccounts.some(
-                      (acc) => acc.platform === name
-                    );
-                    const isSelected = selectedPlatforms.includes(name);
-
-                    return (
-                      <SubscriptionCheck key={name} serviceType={serviceType}>
-                        <label
-                          className={`flex items-center p-4 rounded-xl border-2 cursor-pointer transition-all duration-300 ${
-                            isSelected
-                              ? "border-teal-300 bg-teal-400/15 shadow-lg"
-                              : isConnected
-                              ? "border-white/30 hover:border-teal-300/60 hover:bg-white/10"
-                              : "border-white/20 bg-white/5 cursor-not-allowed opacity-50"
-                          }`}
+                <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                  <AnimatePresence>
+                    {media.map((m, i) => (
+                      <motion.div
+                        key={m.url + i}
+                        layout
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.9 }}
+                        className="relative aspect-square overflow-hidden rounded-lg border"
+                        style={{ borderColor: "var(--ss-border)" }}
+                      >
+                        {m.type === "video" ? (
+                          <video src={m.previewUrl} className="h-full w-full object-cover" muted />
+                        ) : (
+                          <img src={m.previewUrl} alt={m.name} className="h-full w-full object-cover" />
+                        )}
+                        <span className="absolute left-1 top-1 rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-bold text-white">
+                          {m.type === "video" ? "VIDEO" : `#${i + 1}`}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => removeMedia(i)}
+                          className="absolute right-1 top-1 rounded-full bg-black/60 p-1 text-white hover:bg-red-500"
+                          aria-label="Remove media"
                         >
-                          <input
-                            type="checkbox"
-                            className="mr-4 h-6 w-6 text-teal-300 focus:ring-teal-300 border-white/30 rounded bg-transparent"
-                            checked={isSelected}
-                            onChange={() => handlePlatformToggle(name)}
-                            disabled={!isConnected || isPosting}
-                          />
-                          <Icon className={`text-2xl mr-3 ${color}`} />
-                          <span
-                            className={`font-semibold text-lg ${
-                              isConnected ? "text-white" : "text-white/50"
-                            }`}
-                          >
-                            {name}
-                          </span>
-                        </label>
-                      </SubscriptionCheck>
-                    );
-                  })}
+                          <FaTimes className="text-xs" />
+                        </button>
+                      </motion.div>
+                    ))}
+                    {uploadingCount > 0 &&
+                      Array.from({ length: uploadingCount }).map((_, i) => (
+                        <div key={`u${i}`} className="ss-skeleton aspect-square rounded-lg" />
+                      ))}
+                  </AnimatePresence>
                 </div>
+              </div>
+            )}
+          </Field>
+        </Card>
 
-                {/* Quick Select All Button */}
-                <div className="mt-4 text-center">
+        <Card className="mb-4">
+          <div className="flex items-center justify-between mb-3">
+            <label className="ss-label !mb-0">Select platforms</label>
+            <Button type="button" variant="ghost" onClick={handleSelectAll}>
+              {selectedPlatforms.length === connectedAccounts.length && connectedAccounts.length > 0
+                ? "Unselect all"
+                : "Select all connected"}
+            </Button>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {PLATFORMS.map(({ name, icon: Icon, serviceType }) => {
+              const connected = isConnected(name);
+              const selected = selectedPlatforms.includes(name);
+              return (
+                <SubscriptionCheck key={name} serviceType={serviceType}>
                   <button
                     type="button"
-                    onClick={handleSelectAll}
-                    className="rounded-lg px-4 py-2 text-sm font-bold text-teal-300 hover:bg-white/10"
+                    disabled={!connected || isPosting}
+                    onClick={() => togglePlatform(name)}
+                    className="flex items-center gap-2 rounded-xl border-2 p-3 transition-all text-left"
+                    style={{
+                      borderColor: selected ? "var(--ss-accent)" : "var(--ss-border)",
+                      background: selected ? "var(--ss-accent-soft)" : "var(--ss-surface)",
+                      opacity: connected ? 1 : 0.5,
+                      cursor: connected ? "pointer" : "not-allowed",
+                    }}
                   >
-                    {selectedPlatforms.length === connectedAccounts.length
-                      ? "Unselect All"
-                      : "Select All Connected"}
+                    <Icon className="text-xl flex-none" />
+                    <span className="font-semibold text-sm truncate">{name}</span>
                   </button>
-                </div>
-              </div>
+                </SubscriptionCheck>
+              );
+            })}
+          </div>
 
-              {selectedPlatforms.includes("WhatsApp") && (
-                <div className="mb-8">
-                  <label className="block text-lg font-semibold text-white mb-4">
-                    WhatsApp Recipient
-                  </label>
-                  <input
-                    type="tel"
-                    value={whatsappTo}
-                    onChange={(e) => setWhatsappTo(e.target.value)}
-                    placeholder="مثال: 9639xxxxxxxx أو +9639xxxxxxxx"
-                    className="premium-input p-4"
-                    required={selectedPlatforms.includes("WhatsApp")}
-                  />
+          {selectedPlatforms.includes("WhatsApp") && (
+            <div className="mt-4">
+              <Field label="WhatsApp recipient" required>
+                <input
+                  className="ss-input"
+                  type="tel"
+                  value={whatsappTo}
+                  onChange={(e) => setWhatsappTo(e.target.value)}
+                  placeholder="e.g. 9639xxxxxxxx"
+                />
+              </Field>
+            </div>
+          )}
+        </Card>
+
+        <Card className="mb-4">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex items-start gap-3">
+              <span className="flex h-11 w-11 flex-none items-center justify-center rounded-xl" style={{ background: "var(--ss-accent-soft)", color: "var(--ss-accent)" }}>
+                <FaRobot />
+              </span>
+              <div>
+                <h3 className="font-bold">Reply flow for this post</h3>
+                <p className="text-sm mt-0.5" style={{ color: "var(--ss-text-muted)" }}>
+                  Auto-replies to comments &amp; related messages for this post only.
+                </p>
+              </div>
+            </div>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={attachReplyFlow}
+                onChange={(e) => {
+                  setAttachReplyFlow(e.target.checked);
+                  if (e.target.checked && !postReplyFlow) openPostReplyFlowBuilder();
+                }}
+                className="h-4 w-4"
+              />
+              <span className="text-sm font-semibold">Enable</span>
+            </label>
+          </div>
+
+          {attachReplyFlow && (
+            <div className="mt-4 rounded-xl border p-4" style={{ borderColor: "var(--ss-border)", background: "var(--ss-surface-2)" }}>
+              {postReplyFlow ? (
+                <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="font-bold">{postReplyFlow.name}</span>
+                      <Badge variant="accent">{postReplyFlow.flowSteps?.length || 0} steps</Badge>
+                    </div>
+                    <p className="mt-1 text-sm" style={{ color: "var(--ss-text-muted)" }}>
+                      {postReplyFlow.triggerKeywords?.length
+                        ? `Keywords: ${postReplyFlow.triggerKeywords.join(", ")}`
+                        : "Runs on every comment & related message for this post."}
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button type="button" variant="secondary" onClick={openPostReplyFlowBuilder}><FaEdit /> Edit</Button>
+                    <Button type="button" variant="ghost" className="!text-red-500" onClick={() => { setPostReplyFlow(null); setAttachReplyFlow(false); }}><FaTrash /> Remove</Button>
+                  </div>
                 </div>
+              ) : (
+                <Button type="button" onClick={openPostReplyFlowBuilder}><FaMagic /> Build reply flow</Button>
               )}
+            </div>
+          )}
+        </Card>
 
-              {/* Post-specific Reply Flow */}
-              <div className="mb-8 rounded-xl border border-white/10 bg-white/[0.04] p-6">
-                <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
-                  <div className="flex items-start gap-4">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-teal-400/15 text-teal-200">
-                      <FaRobot className="text-2xl" />
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-bold text-white">
-                        Reply Flow For This Post
-                      </h3>
-                      <p className="mt-1 text-sm text-white/65">
-                        Runs only for this post: replies to comments, sends a private reply when supported, and follows related messages.
-                      </p>
-                    </div>
-                  </div>
+        {formError && <div className="ss-error mb-3">{formError}</div>}
 
-                  <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3">
-                    <input
-                      type="checkbox"
-                      checked={attachReplyFlow}
-                      onChange={(e) => {
-                        setAttachReplyFlow(e.target.checked);
-                        if (e.target.checked && !postReplyFlow) {
-                          openPostReplyFlowBuilder();
-                        }
-                      }}
-                      className="h-5 w-5 rounded border-white/30 bg-transparent text-teal-300 focus:ring-teal-300"
-                    />
-                    <span className="text-sm font-bold text-white">
-                      Enable
-                    </span>
-                  </label>
-                </div>
+        <div className="flex justify-center">
+          <Button type="submit" className="!px-10 !py-3 !text-base" loading={isPosting} disabled={!postContent || selectedPlatforms.length === 0 || uploadingCount > 0}>
+            <FaRocket />
+            {isPosting
+              ? postingProgress || "Posting…"
+              : `Post to ${selectedPlatforms.length} platform${selectedPlatforms.length === 1 ? "" : "s"}`}
+          </Button>
+        </div>
+      </form>
 
-                {attachReplyFlow && (
-                  <div className="mt-6 rounded-xl border border-white/10 bg-black/10 p-5">
-                    {postReplyFlow ? (
-                      <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-                        <div>
-                          <div className="flex flex-wrap items-center gap-3">
-                            <span className="text-lg font-bold text-white">
-                              {postReplyFlow.name}
-                            </span>
-                            <span className="rounded-full bg-teal-400/15 px-3 py-1 text-xs font-bold text-teal-200">
-                              {postReplyFlow.flowSteps?.length || 0} step
-                              {(postReplyFlow.flowSteps?.length || 0) === 1 ? "" : "s"}
-                            </span>
-                            <span className="rounded-full bg-amber-300/15 px-3 py-1 text-xs font-bold text-amber-100">
-                              {selectedPlatforms.length === 1
-                                ? selectedPlatforms[0]
-                                : "Selected platforms"}
-                            </span>
-                          </div>
-                          <p className="mt-2 text-sm text-white/60">
-                            {postReplyFlow.triggerKeywords?.length
-                              ? `Keywords: ${postReplyFlow.triggerKeywords.join(", ")}`
-                              : "Runs on every comment and related message for this post."}
-                          </p>
-                        </div>
-
-                        <div className="flex flex-wrap gap-3">
-                          <button
-                            type="button"
-                            onClick={openPostReplyFlowBuilder}
-                            className="flex items-center gap-2 rounded-lg bg-white/10 px-4 py-2 text-sm font-bold text-white hover:bg-white/20"
-                          >
-                            <FaEdit />
-                            Edit
-                          </button>
-                          <button
-                            type="button"
-                            onClick={handleRemovePostReplyFlow}
-                            className="flex items-center gap-2 rounded-lg bg-red-500/15 px-4 py-2 text-sm font-bold text-red-200 hover:bg-red-500/25"
-                          >
-                            <FaTrash />
-                            Remove
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={openPostReplyFlowBuilder}
-                        className="premium-button"
-                      >
-                        <FaMagic />
-                        Build Reply Flow
-                      </button>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {/* Action Button */}
-              <div className="flex gap-4 justify-center mt-12">
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  type="submit"
-                  className="premium-button px-12 py-4 text-xl disabled:cursor-not-allowed disabled:opacity-50"
-                  disabled={
-                    !postContent || selectedPlatforms.length === 0 || isPosting
-                  }
-                >
-                  <FaRocket className="text-2xl" />
-                  {isPosting
-                    ? postingProgress || "Posting..."
-                    : `Post to ${selectedPlatforms.length} Platform${
-                        selectedPlatforms.length > 1 ? "s" : ""
-                      }`}
-                </motion.button>
-              </div>
-            </form>
-          </motion.div>
-          <FlowBuilder
-            isOpen={showFlowBuilder}
-            onClose={() => setShowFlowBuilder(false)}
-            onSave={handleSavePostReplyFlow}
-            editingFlow={flowBuilderDraft}
-            draftMode
-            title="Post Reply Flow"
-            saveLabel={postReplyFlow ? "Update Attached Flow" : "Attach Flow"}
-          />
-        </motion.div>
+      <FlowBuilder
+        isOpen={showFlowBuilder}
+        onClose={() => setShowFlowBuilder(false)}
+        onSave={handleSavePostReplyFlow}
+        editingFlow={flowBuilderDraft}
+        draftMode
+        title="Post Reply Flow"
+        saveLabel={postReplyFlow ? "Update Attached Flow" : "Attach Flow"}
+      />
     </div>
   );
-};
-
-export default CreatePostPage;
+}

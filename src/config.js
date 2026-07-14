@@ -1,4 +1,7 @@
 // API Configuration
+// ⚠️ لا تكتب رابط الباك اند بأي صفحة. غيّره من ملف .env فقط:  VITE_API_BASE_URL=...
+// ⚠️ Do NOT hardcode the backend URL in any page. Change it ONLY in .env (VITE_API_BASE_URL).
+// القيمة الافتراضية تُستعمل فقط إذا ما كان في .env.
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://www.sushiluha.com";
 
 // API endpoints

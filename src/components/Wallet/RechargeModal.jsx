@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { API_BASE_URL } from "../../config";
 import PropTypes from "prop-types";
 import {
   FaTimes,
@@ -68,7 +69,7 @@ const RechargeModal = ({ isOpen, onClose, onRechargeSuccess }) => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.post(
-        "https://www.sushiluha.com/api/wallet/recharge",
+        API_BASE_URL + "/api/wallet/recharge",
         {
           method: selectedMethod,
           amount: parseFloat(amount),

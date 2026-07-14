@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { API_BASE_URL } from "../config";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
@@ -20,7 +21,7 @@ export const useAuth = () => {
       }
 
       setIsLoading(true);
-      const response = await axios.get("https://www.sushiluha.com/api/user", {
+      const response = await axios.get(API_BASE_URL + "/api/user", {
         headers: { Authorization: `Bearer ${token}` },
         withCredentials: true,
       });
@@ -44,7 +45,7 @@ export const useAuth = () => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.put(
-        "https://www.sushiluha.com/api/user",
+        API_BASE_URL + "/api/user",
         updateData,
         {
           headers: { Authorization: `Bearer ${token}` },

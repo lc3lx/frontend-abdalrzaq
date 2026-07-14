@@ -1,204 +1,121 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { FaUser, FaKey, FaSave, FaMoon, FaSun } from "react-icons/fa";
 import { useAuth } from "../hooks/useAuth";
-import { motion } from "framer-motion";
-import { FaCog, FaUser, FaKey, FaSave } from "react-icons/fa";
-import Navbar from "../components/Navbar";
+import { useTheme } from "../contexts/ThemeContext";
+import { PageHeader, Card, Button, Field } from "../components/ui/kit";
 
-const SettingsPage = () => {
+export default function SettingsPage() {
   const { user, updateProfile } = useAuth();
+  const { darkMode, toggleDarkMode } = useTheme();
   const [newUsername, setNewUsername] = useState("");
   const [newPassword, setNewPassword] = useState("");
-  const [windowSize, setWindowSize] = useState({ width: 1920, height: 1080 });
-
-  useEffect(() => {
-    const updateSize = () => {
-      setWindowSize({
-        width: window.innerWidth,
-        height: window.innerHeight,
-      });
-    };
-
-    updateSize();
-    window.addEventListener("resize", updateSize);
-    return () => window.removeEventListener("resize", updateSize);
-  }, []);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
+    setError("");
+    setSuccess("");
+
+    const updateData = {};
+    if (newUsername) updateData.username = newUsername;
+    if (newPassword) updateData.password = newPassword;
+    if (Object.keys(updateData).length === 0) {
+      setError("No changes to update.");
+      return;
+    }
+    if (newPassword && newPassword.length < 6) {
+      setError("Password must be at least 6 characters.");
+      return;
+    }
 
     try {
-      const updateData = {};
-      if (newUsername) updateData.username = newUsername;
-      if (newPassword) updateData.password = newPassword;
-
-      if (Object.keys(updateData).length === 0) {
-        alert("No changes to update.");
-        return;
-      }
-
+      setSaving(true);
       await updateProfile(updateData);
       setNewUsername("");
       setNewPassword("");
-      alert("Profile updated successfully!");
-    } catch (error) {
-      alert(
-        `Error updating profile: ${
-          error.response?.data?.error || "Unknown error"
-        }`
-      );
+      setSuccess("Profile updated successfully.");
+    } catch (err) {
+      setError(err.response?.data?.error || "Failed to update profile.");
+    } finally {
+      setSaving(false);
     }
   };
 
   return (
-    <div className="app-bg min-h-screen relative overflow-hidden">
-      <Navbar />
+    <div className="max-w-3xl mx-auto">
+      <PageHeader title="Settings" subtitle="Manage your account and preferences" />
 
-      {/* Animated Background */}
-      <motion.div
-        className="absolute inset-0 opacity-30"
-        animate={{
-          background: [
-            "radial-gradient(600px circle at 20% 30%, #18d5bd 0%, transparent 50%)",
-            "radial-gradient(600px circle at 80% 70%, #f5b84b 0%, transparent 50%)",
-            "radial-gradient(600px circle at 40% 80%, #f05776 0%, transparent 50%)",
-            "radial-gradient(600px circle at 20% 30%, #18d5bd 0%, transparent 50%)",
-          ],
-        }}
-        transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-      />
+      <Card className="mb-5">
+        <div className="flex items-center gap-2 mb-4">
+          <FaUser style={{ color: "var(--ss-accent)" }} />
+          <h3 className="font-bold">Personal information</h3>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="rounded-xl p-4" style={{ background: "var(--ss-surface-2)" }}>
+            <p className="text-xs" style={{ color: "var(--ss-text-muted)" }}>Username</p>
+            <p className="font-semibold">{user.username || "—"}</p>
+          </div>
+          <div className="rounded-xl p-4" style={{ background: "var(--ss-surface-2)" }}>
+            <p className="text-xs" style={{ color: "var(--ss-text-muted)" }}>Email</p>
+            <p className="font-semibold break-all">{user.email || "—"}</p>
+          </div>
+        </div>
+      </Card>
 
-      {/* Floating Particles */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(20)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute w-2 h-2 bg-teal-300/15 rounded-full"
-            animate={{
-              x: [
-                Math.random() * windowSize.width,
-                Math.random() * windowSize.width,
-              ],
-              y: [
-                Math.random() * windowSize.height,
-                Math.random() * windowSize.height,
-              ],
-              opacity: [0, 1, 0],
-            }}
-            transition={{
-              duration: Math.random() * 20 + 10,
-              repeat: Infinity,
-              delay: Math.random() * 5,
-              ease: "linear",
-            }}
-          />
-        ))}
-      </div>
+      <Card className="mb-5">
+        <form onSubmit={handleUpdateProfile}>
+          <div className="flex items-center gap-2 mb-4">
+            <FaKey style={{ color: "var(--ss-accent)" }} />
+            <h3 className="font-bold">Update profile</h3>
+          </div>
 
-      {/* Main Content */}
-      <div className="relative z-10 pt-20 px-6 py-20">
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 0.2 }}
-          className="max-w-4xl mx-auto"
-        >
-          {/* Header */}
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="text-center mb-12"
-          >
-            <div className="w-20 h-20 bg-gradient-to-br from-teal-300 via-amber-300 to-rose-400 rounded-2xl flex items-center justify-center mx-auto mb-6 text-slate-950 shadow-glow">
-              <FaCog className="text-3xl text-white" />
+          <Field label="New username">
+            <input
+              className="ss-input"
+              value={newUsername}
+              onChange={(e) => setNewUsername(e.target.value)}
+              placeholder="Enter new username"
+              autoComplete="username"
+            />
+          </Field>
+
+          <Field label="New password" error={error && newPassword ? error : ""}>
+            <input
+              type="password"
+              className={`ss-input ${error && newPassword ? "has-error" : ""}`}
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              placeholder="Enter new password"
+              autoComplete="new-password"
+            />
+          </Field>
+
+          {error && !newPassword && <div className="ss-error mb-3">{error}</div>}
+          {success && (
+            <div className="mb-3 text-sm font-medium" style={{ color: "var(--ss-success)" }}>
+              {success}
             </div>
-            <h1 className="text-5xl lg:text-6xl font-black text-white mb-4">
-              Settings
-            </h1>
-            <p className="text-xl text-white/80">
-              Manage your account and preferences
-            </p>
-          </motion.div>
+          )}
 
-          {/* Settings Card */}
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
-            className="premium-panel rounded-2xl p-8 lg:p-12"
-          >
-            <div className="mb-8">
-              <div className="flex items-center gap-3 mb-6">
-                <FaUser className="text-2xl text-blue-400" />
-                <h3 className="text-2xl font-bold text-white">
-                  Personal Information
-                </h3>
-              </div>
-              <div className="bg-white/5 rounded-xl p-6 border border-white/10">
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <span className="text-white/70 font-medium">Username:</span>
-                    <span className="text-white ml-2">{user.username}</span>
-                  </div>
-                  <div>
-                    <span className="text-white/70 font-medium">Email:</span>
-                    <span className="text-white ml-2">{user.email}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
+          <Button type="submit" className="w-full" loading={saving}>
+            <FaSave /> Update profile
+          </Button>
+        </form>
+      </Card>
 
-            {/* Update Profile Form */}
-            <div className="mb-8">
-              <div className="flex items-center gap-3 mb-6">
-                <FaKey className="text-2xl text-purple-400" />
-                <h3 className="text-2xl font-bold text-white">
-                  Update Profile
-                </h3>
-              </div>
-              <div className="space-y-6">
-                <div>
-                  <label className="block text-lg font-semibold text-white mb-3">
-                    New Username
-                  </label>
-                  <input
-                    type="text"
-                    className="premium-input"
-                    value={newUsername}
-                    onChange={(e) => setNewUsername(e.target.value)}
-                    placeholder="Enter new username"
-                  />
-                </div>
-                <div>
-                  <label className="block text-lg font-semibold text-white mb-3">
-                    New Password
-                  </label>
-                  <input
-                    type="password"
-                    className="premium-input"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="Enter new password"
-                  />
-                </div>
-                <div className="pt-4">
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    type="submit"
-                    className="premium-button w-full text-lg"
-                  >
-                    <FaSave />
-                    Update Profile
-                  </motion.button>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        </motion.div>
-      </div>
+      <Card>
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="font-bold">Appearance</h3>
+            <p className="text-sm" style={{ color: "var(--ss-text-muted)" }}>Toggle light or dark theme</p>
+          </div>
+          <Button variant="secondary" onClick={toggleDarkMode}>
+            {darkMode ? <><FaSun /> Light</> : <><FaMoon /> Dark</>}
+          </Button>
+        </div>
+      </Card>
     </div>
   );
-};
-
-export default SettingsPage;
+}

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { API_BASE_URL } from "../../config";
 import {
   FaYoutube,
   FaUpload,
@@ -94,7 +95,7 @@ const YouTubeUpload = ({ onClose, onSuccess }) => {
       formDataToSend.append("privacyStatus", formData.privacyStatus);
 
       const response = await axios.post(
-        "https://www.sushiluha.com/api/youtube/upload",
+        API_BASE_URL + "/api/youtube/upload",
         formDataToSend,
         {
           headers: {

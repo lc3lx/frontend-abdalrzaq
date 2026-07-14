@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { API_BASE_URL } from "../config";
 import axios from "axios";
 
 export const useMessages = () => {
@@ -24,7 +25,7 @@ export const useMessages = () => {
       const params = new URLSearchParams(filters);
 
       const response = await axios.get(
-        `https://www.sushiluha.com/api/messages?${params}`,
+        `${API_BASE_URL}/api/messages?${params}`,
         {
           headers: { Authorization: `Bearer ${token}` },
           withCredentials: true,
@@ -45,7 +46,7 @@ export const useMessages = () => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.get(
-        "https://www.sushiluha.com/api/messages/stats",
+        API_BASE_URL + "/api/messages/stats",
         {
           headers: { Authorization: `Bearer ${token}` },
           withCredentials: true,
@@ -62,7 +63,7 @@ export const useMessages = () => {
     try {
       const token = localStorage.getItem("token");
       await axios.patch(
-        `https://www.sushiluha.com/api/messages/${messageId}/read`,
+        `${API_BASE_URL}/api/messages/${messageId}/read`,
         {},
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -92,7 +93,7 @@ export const useMessages = () => {
     try {
       const token = localStorage.getItem("token");
       await axios.patch(
-        `https://www.sushiluha.com/api/messages/${messageId}/archive`,
+        `${API_BASE_URL}/api/messages/${messageId}/archive`,
         {},
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -122,7 +123,7 @@ export const useMessages = () => {
       setIsLoading(true);
       const token = localStorage.getItem("token");
       const response = await axios.post(
-        "https://www.sushiluha.com/api/messages/sync",
+        API_BASE_URL + "/api/messages/sync",
         {},
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -146,7 +147,7 @@ export const useMessages = () => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.post(
-        `https://www.sushiluha.com/api/messages/${messageId}/reply`,
+        `${API_BASE_URL}/api/messages/${messageId}/reply`,
         { content, imageUrl },
         {
           headers: { Authorization: `Bearer ${token}` },

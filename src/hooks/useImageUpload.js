@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { API_BASE_URL } from "../config";
 import axios from "axios";
 
 const useImageUpload = () => {
@@ -48,7 +49,7 @@ const useImageUpload = () => {
       formData.append("media", file);
 
       const response = await axios.post(
-        "https://www.sushiluha.com/api/upload/media",
+        API_BASE_URL + "/api/upload/media",
         formData,
         {
           headers: {
@@ -109,7 +110,7 @@ const useImageUpload = () => {
       formData.append("image", file);
 
       const response = await axios.post(
-        "https://www.sushiluha.com/api/upload/image",
+        API_BASE_URL + "/api/upload/image",
         formData,
         {
           headers: {
@@ -176,7 +177,7 @@ const useImageUpload = () => {
       });
 
       const response = await axios.post(
-        "https://www.sushiluha.com/api/upload/images",
+        API_BASE_URL + "/api/upload/images",
         formData,
         {
           headers: {
@@ -211,7 +212,7 @@ const useImageUpload = () => {
     try {
       const token = localStorage.getItem("token");
       await axios.delete(
-        `https://www.sushiluha.com/api/upload/image/${filename}`,
+        `${API_BASE_URL}/api/upload/image/${filename}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -231,7 +232,7 @@ const useImageUpload = () => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.get(
-        "https://www.sushiluha.com/api/upload/images",
+        API_BASE_URL + "/api/upload/images",
         {
           headers: {
             Authorization: `Bearer ${token}`,

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { API_BASE_URL } from "../../config";
 import {
   FaWallet,
   FaArrowUp,
@@ -26,7 +27,7 @@ const WalletStats = ({ wallet }) => {
       }
 
       const response = await axios.get(
-        `https://www.sushiluha.com/api/wallet/summary?period=${period}`,
+        `${API_BASE_URL}/api/wallet/summary?period=${period}`,
         {
           headers: { Authorization: `Bearer ${token}` },
           withCredentials: true,

@@ -1,15 +1,15 @@
 import { useState, useEffect } from "react";
+import { API_BASE_URL } from "../config";
 import { motion, AnimatePresence } from "framer-motion";
+import axios from "axios";
 import {
   FaPlus,
   FaCreditCard,
   FaWallet,
   FaHistory,
-  FaCog,
   FaShareAlt,
   FaGift,
 } from "react-icons/fa";
-import Navbar from "../components/Navbar";
 import CreditCard from "../components/Wallet/CreditCard";
 import AddCardModal from "../components/Wallet/AddCardModal";
 import WalletStats from "../components/Wallet/WalletStats";
@@ -17,9 +17,23 @@ import TransactionList from "../components/Wallet/TransactionList";
 import RechargeModal from "../components/Wallet/RechargeModal";
 import GiftModal from "../components/Wallet/GiftModal";
 import ReferralPanel from "../components/Referral/ReferralPanel";
-import axios from "axios";
+import {
+  PageHeader,
+  StatCard,
+  Card,
+  Button,
+  EmptyState,
+  Skeleton,
+} from "../components/ui/kit";
 
-const WalletPage = () => {
+const TABS = [
+  { id: "overview", label: "Overview", icon: FaWallet },
+  { id: "cards", label: "Cards", icon: FaCreditCard },
+  { id: "transactions", label: "Transactions", icon: FaHistory },
+  { id: "referral", label: "Referral", icon: FaShareAlt },
+];
+
+export default function WalletPage() {
   const [wallet, setWallet] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -29,20 +43,6 @@ const WalletPage = () => {
   const [showGift, setShowGift] = useState(false);
   const [selectedCard, setSelectedCard] = useState(null);
   const [refreshTransactions, setRefreshTransactions] = useState(0);
-  const [windowSize, setWindowSize] = useState({ width: 1920, height: 1080 });
-
-  useEffect(() => {
-    const updateSize = () => {
-      setWindowSize({
-        width: window.innerWidth,
-        height: window.innerHeight,
-      });
-    };
-
-    updateSize();
-    window.addEventListener("resize", updateSize);
-    return () => window.removeEventListener("resize", updateSize);
-  }, []);
 
   useEffect(() => {
     fetchWallet();
@@ -50,84 +50,47 @@ const WalletPage = () => {
 
   const fetchWallet = async () => {
     try {
+      setError("");
       const token = localStorage.getItem("token");
-      if (!token) {
-        setError("Please login to access wallet");
-        setLoading(false);
-        return;
-      }
-
-      const response = await axios.get("https://www.sushiluha.com/api/wallet", {
+      const { data } = await axios.get(API_BASE_URL + "/api/wallet", {
         headers: { Authorization: `Bearer ${token}` },
         withCredentials: true,
       });
-
-      setWallet(response.data);
+      setWallet(data);
     } catch (err) {
-      console.error("Error fetching wallet:", err);
-      if (err.response?.status === 401) {
-        setError("Session expired. Please login again.");
-      } else if (err.response?.status === 404) {
-        setError("Wallet not found. Please contact support.");
-      } else if (err.code === "ECONNREFUSED") {
-        setError("Backend server is not running. Please start the server.");
-      } else {
-        setError("Failed to load wallet information");
-      }
+      if (err.response?.status === 401) setError("Session expired. Please login again.");
+      else if (err.response?.status === 404) setError("Wallet not found. Please contact support.");
+      else setError("Failed to load wallet information.");
     } finally {
       setLoading(false);
     }
   };
 
   const handleCardAdded = (newCard) => {
-    setWallet((prev) => ({
-      ...prev,
-      cards: [...prev.cards, newCard],
-    }));
+    setWallet((prev) => ({ ...prev, cards: [...(prev?.cards || []), newCard] }));
     setShowAddCard(false);
   };
-
-  const handleCardSelect = (card) => {
+  const handleCardSelect = (card) =>
     setSelectedCard(selectedCard?.cardId === card.cardId ? null : card);
-  };
-
   const handleRechargeSuccess = () => {
-    fetchWallet(); // تحديث بيانات المحفظة
-    setRefreshTransactions((prev) => prev + 1); // تحديث قائمة المعاملات
+    fetchWallet();
+    setRefreshTransactions((p) => p + 1);
     setShowRecharge(false);
   };
-
   const handleGiftSuccess = () => {
-    fetchWallet(); // تحديث بيانات المحفظة
-    setRefreshTransactions((prev) => prev + 1); // تحديث قائمة المعاملات
+    fetchWallet();
+    setRefreshTransactions((p) => p + 1);
     setShowGift(false);
   };
 
-  const tabs = [
-    { id: "overview", label: "نظرة عامة", icon: FaWallet },
-    { id: "cards", label: "البطاقات", icon: FaCreditCard },
-    { id: "transactions", label: "المعاملات", icon: FaHistory },
-    { id: "referral", label: "الإحالة", icon: FaShareAlt },
-    { id: "settings", label: "الإعدادات", icon: FaCog },
-  ];
-
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 p-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="animate-pulse">
-            <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2 space-y-6">
-                <div className="h-64 bg-gray-200 rounded-lg"></div>
-                <div className="h-96 bg-gray-200 rounded-lg"></div>
-              </div>
-              <div className="space-y-6">
-                <div className="h-64 bg-gray-200 rounded-lg"></div>
-                <div className="h-48 bg-gray-200 rounded-lg"></div>
-              </div>
-            </div>
-          </div>
+      <div>
+        <PageHeader title="Wallet" subtitle="Balance, cards & transactions" />
+        <div className="grid gap-4 sm:grid-cols-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Card key={i}><Skeleton style={{ width: "50%" }} /><Skeleton style={{ width: "70%", marginTop: 12, height: 24 }} /></Card>
+          ))}
         </div>
       </div>
     );
@@ -135,394 +98,125 @@ const WalletPage = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 p-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="bg-red-100 text-red-700 p-6 rounded-lg text-center">
-            <h2 className="text-xl font-semibold mb-2">Error Loading Wallet</h2>
-            <p>{error}</p>
-            <button
-              onClick={fetchWallet}
-              className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-            >
-              Try Again
-            </button>
+      <div>
+        <PageHeader title="Wallet" />
+        <Card className="flex items-center justify-between gap-4" style={{ borderColor: "var(--ss-danger)" }}>
+          <div>
+            <p className="font-semibold">Error loading wallet</p>
+            <p className="text-sm" style={{ color: "var(--ss-text-muted)" }}>{error}</p>
           </div>
-        </div>
+          <Button variant="secondary" onClick={fetchWallet}>Try again</Button>
+        </Card>
       </div>
     );
   }
 
-  return (
-    <div className="app-bg min-h-screen relative overflow-hidden">
-      <Navbar />
+  const cards = wallet?.cards || [];
 
-      {/* Animated Background */}
-      <motion.div
-        className="absolute inset-0 opacity-30"
-        animate={{
-          background: [
-            "radial-gradient(600px circle at 20% 30%, #18d5bd 0%, transparent 50%)",
-            "radial-gradient(600px circle at 80% 70%, #f5b84b 0%, transparent 50%)",
-            "radial-gradient(600px circle at 40% 80%, #f05776 0%, transparent 50%)",
-            "radial-gradient(600px circle at 20% 30%, #18d5bd 0%, transparent 50%)",
-          ],
-        }}
-        transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+  return (
+    <div>
+      <PageHeader
+        title="Wallet"
+        subtitle="Balance, cards & transactions"
+        actions={
+          <div className="flex gap-2">
+            <Button onClick={() => setShowRecharge(true)}><FaWallet /> Recharge</Button>
+            <Button variant="secondary" onClick={() => setShowGift(true)}><FaGift /> Gift</Button>
+          </div>
+        }
       />
 
-      {/* Floating Particles */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(20)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute w-2 h-2 bg-teal-300/15 rounded-full"
-            animate={{
-              x: [
-                Math.random() * windowSize.width,
-                Math.random() * windowSize.width,
-              ],
-              y: [
-                Math.random() * windowSize.height,
-                Math.random() * windowSize.height,
-              ],
-              opacity: [0, 1, 0],
-            }}
-            transition={{
-              duration: Math.random() * 20 + 10,
-              repeat: Infinity,
-              delay: Math.random() * 5,
-              ease: "linear",
-            }}
-          />
-        ))}
+      <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 mb-6">
+        <StatCard icon={FaWallet} label="Balance" value={`$${(wallet?.balance || 0).toFixed(2)}`} />
+        <StatCard icon={FaCreditCard} label="Cards" value={cards.length} />
+        <StatCard icon={FaHistory} label="Currency" value={wallet?.currency || "USD"} />
       </div>
 
-      <div className="relative z-10 pt-20 px-6 py-20">
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 0.2 }}
-          className="max-w-7xl mx-auto"
-        >
-          {/* Header */}
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="mb-12 text-center"
-          >
-            <div className="w-20 h-20 bg-gradient-to-br from-teal-300 via-amber-300 to-rose-400 rounded-2xl flex items-center justify-center mx-auto mb-6 text-slate-950 shadow-glow">
-              <FaWallet className="text-3xl text-white" />
-            </div>
-            <h1 className="text-5xl lg:text-6xl font-black text-white mb-4">
-              My Wallet
-            </h1>
-            <p className="text-xl text-white/80">
-              Manage your cards, transactions, and wallet settings
-            </p>
-          </motion.div>
-
-          {/* Wallet Stats Card */}
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
-            className="premium-panel rounded-2xl p-8 lg:p-12 mb-8"
-          >
-            <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold text-white mb-4">
-                Financial Wallet
-              </h2>
-              <p className="text-white/80 text-lg">
-                Manage your cards, transactions, and wallet settings
-              </p>
-            </div>
-
-            {wallet && (
-              <div className="flex justify-center gap-8">
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl px-6 py-4 border border-white/20">
-                  <p className="text-sm text-white/70 mb-1">Current Balance</p>
-                  <p className="text-3xl font-bold text-white">
-                    ${wallet.balance?.toFixed(2) || "0.00"}
-                  </p>
-                </div>
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl px-6 py-4 border border-white/20">
-                  <p className="text-sm text-white/70 mb-1">Total Cards</p>
-                  <p className="text-3xl font-bold text-white">
-                    {wallet.cards?.length || 0}
-                  </p>
-                </div>
-              </div>
-            )}
-            <div className="flex justify-center gap-6 mt-8">
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => setShowRecharge(true)}
-                className="premium-button text-lg"
-              >
-                <FaWallet className="text-xl" />
-                Recharge Wallet
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => setShowGift(true)}
-                className="flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-bold text-lg shadow-2xl hover:from-purple-700 hover:to-pink-700 transition-all duration-300"
-              >
-                <FaGift className="text-xl" />
-                Send Gift
-              </motion.button>
-            </div>
-          </motion.div>
-
-          {/* Tabs */}
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8 }}
-            className="mb-12"
-          >
-            <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-2 border border-white/20">
-              <nav className="flex space-x-2">
-                {tabs.map((tab) => {
-                  const Icon = tab.icon;
-                  return (
-                    <button
-                      key={tab.id}
-                      onClick={() => setActiveTab(tab.id)}
-                      className={`flex items-center gap-3 py-3 px-6 rounded-lg font-medium text-sm transition-all duration-300 ${
-                        activeTab === tab.id
-                          ? "bg-white text-slate-950 shadow-lg"
-                          : "text-white/80 hover:text-white hover:bg-white/10"
-                      }`}
-                    >
-                      <Icon className="text-lg" />
-                      {tab.label}
-                    </button>
-                  );
-                })}
-              </nav>
-            </div>
-          </motion.div>
-
-          {/* Tab Content */}
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={activeTab}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.5 }}
+      {/* Tabs */}
+      <div className="ss-card p-1.5 mb-5 inline-flex flex-wrap gap-1">
+        {TABS.map((t) => {
+          const Icon = t.icon;
+          const active = activeTab === t.id;
+          return (
+            <button
+              key={t.id}
+              onClick={() => setActiveTab(t.id)}
+              className="ss-btn"
+              style={{
+                background: active ? "var(--ss-accent)" : "transparent",
+                color: active ? "#fff" : "var(--ss-text-muted)",
+                boxShadow: active ? "0 6px 16px rgba(99,102,241,0.28)" : "none",
+              }}
             >
-              {activeTab === "overview" && (
-                <div className="space-y-8">
-                  {/* Wallet Stats */}
-                  <WalletStats wallet={wallet} />
-
-                  {/* Recent Cards */}
-                  <div className="premium-panel rounded-2xl p-8">
-                    <div className="flex justify-between items-center mb-8">
-                      <div>
-                        <h3 className="text-2xl font-bold text-white mb-2">
-                          My Cards
-                        </h3>
-                        <p className="text-white/70">
-                          Manage your payment cards
-                        </p>
-                      </div>
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => setShowAddCard(true)}
-                        className="premium-button"
-                      >
-                        <FaPlus className="text-lg" />
-                        <span>Add Card</span>
-                      </motion.button>
-                    </div>
-
-                    {wallet?.cards?.length === 0 ? (
-                      <div className="text-center py-16">
-                        <div className="w-24 h-24 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                          <FaCreditCard className="text-3xl text-blue-500" />
-                        </div>
-                        <h4 className="text-xl font-semibold text-gray-800 mb-3">
-                          لم تتم إضافة أي بطاقات بعد
-                        </h4>
-                        <p className="text-gray-600 mb-6 max-w-md mx-auto">
-                          أضف بطاقتك الأولى للبدء في استخدام محفظتك المالية
-                        </p>
-                        <button
-                          onClick={() => setShowAddCard(true)}
-                          className="premium-button"
-                        >
-                          إضافة بطاقتي الأولى
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {wallet?.cards?.map((card) => (
-                          <div key={card.cardId} className="relative">
-                            <CreditCard
-                              card={card}
-                              onClick={() => handleCardSelect(card)}
-                              isSelected={selectedCard?.cardId === card.cardId}
-                            />
-                            {card.isDefault && (
-                              <div className="absolute -top-2 -left-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full font-medium">
-                                DEFAULT
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Recent Transactions */}
-                  <TransactionList
-                    wallet={wallet}
-                    refreshKey={refreshTransactions}
-                  />
-                </div>
-              )}
-
-              {activeTab === "cards" && (
-                <div className="space-y-8">
-                  <div className="premium-panel rounded-2xl p-8">
-                    <div className="flex justify-between items-center mb-8">
-                      <div>
-                        <h2 className="text-3xl font-bold text-white mb-2">
-                          إدارة البطاقات
-                        </h2>
-                        <p className="text-white/70">
-                          إضافة وتعديل وحذف بطاقات الدفع
-                        </p>
-                      </div>
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => setShowAddCard(true)}
-                        className="premium-button"
-                      >
-                        <FaPlus className="text-lg" />
-                        <span>إضافة بطاقة جديدة</span>
-                      </motion.button>
-                    </div>
-
-                    {wallet?.cards?.length === 0 ? (
-                      <div className="text-center py-12">
-                        <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                          <FaCreditCard className="text-2xl text-white/60" />
-                        </div>
-                        <h4 className="text-lg font-medium text-white mb-2">
-                          No Cards Added
-                        </h4>
-                        <p className="text-white/70 mb-4">
-                          Add your first card to start using your wallet
-                        </p>
-                        <motion.button
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                          onClick={() => setShowAddCard(true)}
-                          className="premium-button px-6 py-2"
-                        >
-                          Add Your First Card
-                        </motion.button>
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {wallet?.cards?.map((card) => (
-                          <div key={card.cardId} className="relative">
-                            <CreditCard
-                              card={card}
-                              onClick={() => handleCardSelect(card)}
-                              isSelected={selectedCard?.cardId === card.cardId}
-                              showBack={selectedCard?.cardId === card.cardId}
-                            />
-                            {card.isDefault && (
-                              <div className="absolute -top-2 -left-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full font-medium">
-                                DEFAULT
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {activeTab === "transactions" && (
-                <div className="space-y-8">
-                  <div className="premium-panel rounded-2xl p-8">
-                    <div className="mb-8">
-                      <h2 className="text-3xl font-bold text-white mb-2">
-                        سجل المعاملات
-                      </h2>
-                      <p className="text-white/70">
-                        عرض جميع معاملاتك وطلبات الشحن
-                      </p>
-                    </div>
-                    <TransactionList
-                      wallet={wallet}
-                      refreshKey={refreshTransactions}
-                    />
-                  </div>
-                </div>
-              )}
-
-              {activeTab === "referral" && (
-                <div className="space-y-8">
-                  <ReferralPanel />
-                </div>
-              )}
-
-              {activeTab === "settings" && (
-                <div className="space-y-6">
-                  <h2 className="text-2xl font-bold text-white">
-                    Wallet Settings
-                  </h2>
-                  <div className="premium-panel rounded-2xl p-6">
-                    <h3 className="text-lg font-semibold text-white mb-4">
-                      Coming Soon
-                    </h3>
-                    <p className="text-white/70">
-                      Wallet settings and preferences will be available soon.
-                    </p>
-                  </div>
-                </div>
-              )}
-            </motion.div>
-          </AnimatePresence>
-
-          {/* Modals */}
-          {/* Add Card Modal */}
-          <AddCardModal
-            isOpen={showAddCard}
-            onClose={() => setShowAddCard(false)}
-            onCardAdded={handleCardAdded}
-          />
-
-          {/* Recharge Modal */}
-          <RechargeModal
-            isOpen={showRecharge}
-            onClose={() => setShowRecharge(false)}
-            onRechargeSuccess={handleRechargeSuccess}
-          />
-
-          {/* Gift Modal */}
-          <GiftModal
-            isOpen={showGift}
-            onClose={() => setShowGift(false)}
-            onGiftSuccess={handleGiftSuccess}
-            wallet={wallet}
-          />
-        </motion.div>
+              <Icon /> {t.label}
+            </button>
+          );
+        })}
       </div>
+
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={activeTab}
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.22 }}
+        >
+          {activeTab === "overview" && (
+            <div className="space-y-6">
+              <WalletStats wallet={wallet} />
+              <CardsSection cards={cards} onAdd={() => setShowAddCard(true)} onSelect={handleCardSelect} selectedCard={selectedCard} />
+              <TransactionList wallet={wallet} refreshKey={refreshTransactions} />
+            </div>
+          )}
+          {activeTab === "cards" && (
+            <CardsSection cards={cards} onAdd={() => setShowAddCard(true)} onSelect={handleCardSelect} selectedCard={selectedCard} showBack />
+          )}
+          {activeTab === "transactions" && <TransactionList wallet={wallet} refreshKey={refreshTransactions} />}
+          {activeTab === "referral" && <ReferralPanel />}
+        </motion.div>
+      </AnimatePresence>
+
+      <AddCardModal isOpen={showAddCard} onClose={() => setShowAddCard(false)} onCardAdded={handleCardAdded} />
+      <RechargeModal isOpen={showRecharge} onClose={() => setShowRecharge(false)} onRechargeSuccess={handleRechargeSuccess} />
+      <GiftModal isOpen={showGift} onClose={() => setShowGift(false)} onGiftSuccess={handleGiftSuccess} wallet={wallet} />
     </div>
   );
-};
+}
 
-export default WalletPage;
+function CardsSection({ cards, onAdd, onSelect, selectedCard, showBack }) {
+  return (
+    <Card>
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-bold">My cards</h3>
+        <Button onClick={onAdd}><FaPlus /> Add card</Button>
+      </div>
+      {cards.length === 0 ? (
+        <EmptyState
+          icon={FaCreditCard}
+          title="No cards yet"
+          description="Add your first card to start using your wallet."
+          action={<Button onClick={onAdd}><FaPlus /> Add your first card</Button>}
+        />
+      ) : (
+        <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+          {cards.map((card) => (
+            <div key={card.cardId} className="relative">
+              <CreditCard
+                card={card}
+                onClick={() => onSelect(card)}
+                isSelected={selectedCard?.cardId === card.cardId}
+                showBack={showBack && selectedCard?.cardId === card.cardId}
+              />
+              {card.isDefault && (
+                <div className="absolute -top-2 -left-2 rounded-full bg-green-500 px-2 py-1 text-xs font-medium text-white">
+                  DEFAULT
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </Card>
+  );
+}

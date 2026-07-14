@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { API_BASE_URL } from "../../config";
 import PropTypes from "prop-types";
 import {
   FaShareAlt,
@@ -30,7 +31,7 @@ const ReferralPanel = () => {
       }
 
       const response = await axios.get(
-        "https://www.sushiluha.com/api/referral/my-referrals",
+        API_BASE_URL + "/api/referral/my-referrals",
         {
           headers: { Authorization: `Bearer ${token}` },
           withCredentials: true,

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { API_BASE_URL } from "../../config";
 import PropTypes from "prop-types";
 import {
   FaArrowUp,
@@ -48,7 +49,7 @@ const TransactionList = ({ wallet, refreshKey }) => {
       if (filter === "recharge") {
         // Fetch recharge requests
         response = await axios.get(
-          "https://www.sushiluha.com/api/wallet/recharge-requests",
+          API_BASE_URL + "/api/wallet/recharge-requests",
           {
             headers: { Authorization: `Bearer ${token}` },
             withCredentials: true,
@@ -65,7 +66,7 @@ const TransactionList = ({ wallet, refreshKey }) => {
       } else {
         // Fetch regular transactions
         response = await axios.get(
-          `https://www.sushiluha.com/api/wallet/transactions?page=${page}&limit=10&type=${
+          `${API_BASE_URL}/api/wallet/transactions?page=${page}&limit=10&type=${
             filter === "all" ? "" : filter
           }`,
           {
